@@ -3,6 +3,9 @@ So...
 It's come to this...
 
 ==================================================================================================================================================================
+Status Update - 7/07/2021 5:01 PM
+	Ok so the Node structure is mostly complete. Need to create an interface in the JSONlist class to be able to test it. Operator overloads ahoy!
+
 Status Update - 6/30/2021 7:46 PM
 	I'm starting to understand std::visit but it doesn't look like the solution to the problem. 
 

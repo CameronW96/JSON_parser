@@ -1,6 +1,6 @@
 #pragma once
-#ifndef jsontr.h
-#define jsontr.h
+#ifndef jsontr
+#define jsontr
 
 #include <utility>
 #include <string>
@@ -46,13 +46,12 @@ namespace JSONator
 				bool m_is_array = false;
 				std::string m_key;
 				std::variant<JSON_Value, std::vector<JSON_Value>> m_value;
-				std::vector<JSON_Value> value2;
 
 			public:
 				JSON_KVP() {};
-				JSON_KVP(JSON_KVP& t_copy) {};
+				//JSON_KVP(JSON_KVP& t_copy) {};
 
-				JSON_KVP& operator=(const JSON_KVP& t_copy)
+				/*JSON_KVP& operator=(const JSON_KVP& t_copy)
 				{
 					m_is_array = t_copy.m_is_array;
 					m_key = t_copy.m_key;
@@ -66,18 +65,20 @@ namespace JSONator
 						std::vector<JSON_Value> temp = std::get<std::vector<JSON_Value>>(t_copy.m_value);
 						m_value = temp;
 					}
-				}
+				}*/
 			};
 
+		private:
 			// specifies whether this node is a JSON object
 			// m_value should be initialized to a vector in this case
 			bool m_is_object = false;
+			std::string object_key;
 			std::variant<JSON_KVP, std::vector<JSON_KVP>> m_kvp;
 
 		public:
 			// **** VALUE SETTERS ****
 
-			void init(std::string t_key, JSON_Value t_value)
+			void init(const std::string &t_key, const JSON_Value &t_value)
 			{
 				JSON_KVP init_kvp;
 				init_kvp.m_key = t_key;
@@ -85,35 +86,35 @@ namespace JSONator
 
 				m_kvp = init_kvp;
 			}
-			void init_int (std::string t_key, int t_value)
+			void init_int (const std::string &t_key, const int &t_value)
 			{
 				JSON_Value init_value;
 				init_value.m_value_individual = t_value;
 
 				init(t_key, init_value);
 			}
-			void init_bool (std::string t_key, bool t_value)
+			void init_bool (const std::string &t_key, const bool &t_value)
 			{
 				JSON_Value init_value;
 				init_value.m_value_individual = t_value;
 
 				init(t_key, init_value);
 			}
-			void init_fpoint (std::string t_key, double t_value)
+			void init_fpoint (const std::string &t_key, const double &t_value)
 			{
 				JSON_Value init_value;
 				init_value.m_value_individual = t_value;
 
 				init(t_key, init_value);
 			}
-			void init_string (std::string t_key, std::string t_value)
+			void init_string (const std::string &t_key, const std::string &t_value)
 			{
 				JSON_Value init_value;
 				init_value.m_value_individual = t_value;
 
 				init(t_key, init_value);
 			}
-			void init_object (std::string t_key, Node* t_value) // use with unique_ptr
+			void init_object (const std::string &t_key, const Node* &t_value) // use with unique_ptr
 			{
 				JSON_Value init_value;
 				init_value.m_value_individual = std::move(t_value);
@@ -125,7 +126,7 @@ namespace JSONator
 
 			// declares that this node contains an array and initializes the value as empty array
 			// array must be populated with array_push_*type
-			void init_array (std::string t_key)
+			void init_array (const std::string &t_key)
 			{
 				JSON_KVP* temp_ptr = std::get_if<JSON_KVP>(&m_kvp);
 				temp_ptr->m_is_array = true;
@@ -134,7 +135,7 @@ namespace JSONator
 			}
 			// declares that this node contains an object and initializes the node with an empty object
 			// object must be populated with object_push
-			void init_object (std::string t_key)
+			void init_object (const std::string &t_key)
 			{
 				JSON_Value temp_value;
 
@@ -156,48 +157,97 @@ namespace JSONator
 			}
 
 			// **** ARRAY MANIPULATION ****
-			void array_push(JSON_Value t_value)
+
+			// helper method that pushes a JSON_Value object into the current nodes array
+			// returns false if node does not contain an array or true on success
+			bool array_push(const JSON_Value &t_value)
 			{
 				JSON_KVP* kvp_ptr = std::get_if<JSON_KVP>(&m_kvp);
-				std::get_if<std::vector<JSON_Value>>(&kvp_ptr->m_value)->push_back(t_value);
+				if (kvp_ptr == nullptr) { return false; } // check to ensure node contains the assumed data type (JSON_KVP vs. std::vector<JSON_KVP>)
+
+				std::vector<JSON_Value>* value_ptr = std::get_if<std::vector<JSON_Value>>(&kvp_ptr->m_value);
+				if (value_ptr == nullptr) { return false; } // check to ensure KVP contains the assumed data type (JSON_Value vs. std::vector<JSON_Value>)
+
+				value_ptr->push_back(t_value);
+				return true;
 			}
-			void array_push_int (int t_input)
+			bool array_push_int (const int &t_input)
 			{
 				JSON_Value temp_value;
 				temp_value.m_value_individual = t_input;
-				array_push(temp_value);
+				if (array_push(temp_value))
+				{
+					return true;
+				}
+				else
+				{
+					return false;
+				}
 			}
-			void array_push_bool (bool t_input)
+			bool array_push_bool (const bool &t_input)
 			{
 				JSON_Value temp_value;
 				temp_value.m_value_individual = t_input;
-				array_push(temp_value);
+				if (array_push(temp_value))
+				{
+					return true;
+				}
+				else
+				{
+					return false;
+				}
 			}
-			void array_push_fpoint (double t_input)
+			bool array_push_fpoint (const double &t_input)
 			{
 				JSON_Value temp_value;
 				temp_value.m_value_individual = t_input;
-				array_push(temp_value);
+				if (array_push(temp_value))
+				{
+					return true;
+				}
+				else
+				{
+					return false;
+				}
 			}
-			void array_push_string (std::string t_input)
+			bool array_push_string (const std::string &t_input)
 			{
 				JSON_Value temp_value;
 				temp_value.m_value_individual = t_input;
-				array_push(temp_value);
+				if (array_push(temp_value))
+				{
+					return true;
+				}
+				else
+				{
+					return false;
+				}
 			}
-			void array_push_object (Node* t_input) 
+			bool array_push_object (const Node* &t_input)
 			{
 				JSON_Value temp_value;
 				temp_value.m_value_individual = t_input;
-				array_push(temp_value);
+				if (array_push(temp_value))
+				{
+					return true;
+				}
+				else
+				{
+					return false;
+				}
 			}
 
 			// **** OBJECT MANIPULATION ****
 
-			// pushes a previously constructed Node object
-			// expects a unique_ptr to be passed as the argument
-			void object_push (Node& t_input)
-			{}
+			// pushes a previously constructed KVP
+			bool object_push (const JSON_KVP &t_input)
+			{
+				std::vector<JSON_KVP>* obj_ptr = std::get_if<std::vector<JSON_KVP>>(&m_kvp);
+				if (obj_ptr == nullptr) { return false; } // check to ensure KVP contains the assumed data type (std::vector<JSON_KVP> vs. JSON_KVP)
+
+				obj_ptr->push_back(t_input);
+				return true;
+			}
 
 			// **** STATE GETTERS ****
 
@@ -210,42 +260,209 @@ namespace JSONator
 			// 0 = VOID/NULL, 1 = int, 2 = bool, 3 = double, 4 = string, 5 = object
 			int get_value_type ()
 			{}
+			
+			std::string get_key ()
+			{
+				if (m_is_object == true)
+				{ 
+					return object_key;
+				}
+				else
+				{
+					JSON_KVP* kvp_ptr = std::get_if<JSON_KVP>(&m_kvp);
+					return kvp_ptr->m_key;
+				}
+			}
 
 			// **** VALUE GETTERS ****
 
 			// returns value as type requested
-			// returns nullptr if type requested does not match type contained
-			std::string get_key ()
-			{}
-
+			// throws "bad_type" if type does not match
 			int get_value_as_int ()
-			{}
+			{
+				JSON_KVP* kvp_ptr = std::get_if<JSON_KVP>(&m_kvp);
+				JSON_Value* value_ptr = std::get_if<JSON_Value>(&kvp_ptr->m_value);
+
+				if (std::holds_alternative<int>(value_ptr->m_value_individual))
+				{
+					return std::get<int>(value_ptr->m_value_individual);
+				}
+				else
+				{
+					throw "bad_type";
+				}
+			}
 			bool get_value_as_bool ()
-			{}
+			{
+				JSON_KVP* kvp_ptr = std::get_if<JSON_KVP>(&m_kvp);
+				JSON_Value* value_ptr = std::get_if<JSON_Value>(&kvp_ptr->m_value);
+
+				if (std::holds_alternative<bool>(value_ptr->m_value_individual))
+				{
+					return std::get<bool>(value_ptr->m_value_individual);
+				}
+				else
+				{
+					throw "bad_type";
+				}
+			}
 			double get_value_as_fpoint ()
-			{}
+			{
+				JSON_KVP* kvp_ptr = std::get_if<JSON_KVP>(&m_kvp);
+				JSON_Value* value_ptr = std::get_if<JSON_Value>(&kvp_ptr->m_value);
+
+				if (std::holds_alternative<double>(value_ptr->m_value_individual))
+				{
+					return std::get<double>(value_ptr->m_value_individual);
+				}
+				else
+				{
+					throw "bad_type";
+				}
+			}
 			std::string get_value_as_string ()
-			{}
-			Node* get_value_as_object () // returns unique_ptr and must be moved via move semantics
-			{}
+			{
+				JSON_KVP* kvp_ptr = std::get_if<JSON_KVP>(&m_kvp);
+				JSON_Value* value_ptr = std::get_if<JSON_Value>(&kvp_ptr->m_value);
+
+				if (std::holds_alternative<std::string>(value_ptr->m_value_individual))
+				{
+					return std::get<std::string>(value_ptr->m_value_individual);
+				}
+				else
+				{
+					throw "bad_type";
+				}
+			}
+			Node* get_value_as_object ()
+			{
+				JSON_KVP* kvp_ptr = std::get_if<JSON_KVP>(&m_kvp);
+				JSON_Value* value_ptr = std::get_if<JSON_Value>(&kvp_ptr->m_value);
+
+				if (std::holds_alternative<Node*>(value_ptr->m_value_individual))
+				{
+					return std::get<Node*>(value_ptr->m_value_individual);
+				}
+				else
+				{
+					throw "bad_type";
+				}
+			}
 
 			int get_array_value_as_int (int t_index)
-			{}
+			{
+				JSON_KVP* kvp_ptr = std::get_if<JSON_KVP>(&m_kvp);
+				std::vector<JSON_Value>* value_ptr = std::get_if<std::vector<JSON_Value>>(&kvp_ptr->m_value);
+				std::vector<JSON_Value>& value_ref = *value_ptr;
+				JSON_Value temp_value = value_ref[t_index];
+
+				if (std::holds_alternative<int>(temp_value.m_value_individual))
+				{
+					return std::get<int>(temp_value.m_value_individual);
+				}
+				else
+				{
+					throw "bad_type";
+				}
+			}
 			bool get_array_value_as_bool (int t_index)
-			{}
+			{
+				JSON_KVP* kvp_ptr = std::get_if<JSON_KVP>(&m_kvp);
+				std::vector<JSON_Value>* value_ptr = std::get_if<std::vector<JSON_Value>>(&kvp_ptr->m_value);
+				std::vector<JSON_Value>& value_ref = *value_ptr;
+				JSON_Value temp_value = value_ref[t_index];
+
+				if (std::holds_alternative<bool>(temp_value.m_value_individual))
+				{
+					return std::get<bool>(temp_value.m_value_individual);
+				}
+				else
+				{
+					throw "bad_type";
+				}
+			}
 			double get_array_value_as_fpoint (int t_index)
-			{}
+			{
+				JSON_KVP* kvp_ptr = std::get_if<JSON_KVP>(&m_kvp);
+				std::vector<JSON_Value>* value_ptr = std::get_if<std::vector<JSON_Value>>(&kvp_ptr->m_value);
+				std::vector<JSON_Value>& value_ref = *value_ptr;
+				JSON_Value temp_value = value_ref[t_index];
+
+				if (std::holds_alternative<double>(temp_value.m_value_individual))
+				{
+					return std::get<double>(temp_value.m_value_individual);
+				}
+				else
+				{
+					throw "bad_type";
+				}
+			}
 			std::string get_array_value_as_string (int t_index)
-			{}
-			Node* get_array_value_as_object (int t_index) // returns unique_ptr and must be moved via move semantics
-			{}
+			{
+				JSON_KVP* kvp_ptr = std::get_if<JSON_KVP>(&m_kvp);
+				std::vector<JSON_Value>* value_ptr = std::get_if<std::vector<JSON_Value>>(&kvp_ptr->m_value);
+				std::vector<JSON_Value>& value_ref = *value_ptr;
+				JSON_Value temp_value = value_ref[t_index];
+
+				if (std::holds_alternative<std::string>(temp_value.m_value_individual))
+				{
+					return std::get<std::string>(temp_value.m_value_individual);
+				}
+				else
+				{
+					throw "bad_type";
+				}
+			}
+			Node* get_array_value_as_object (int t_index)
+			{
+				JSON_KVP* kvp_ptr = std::get_if<JSON_KVP>(&m_kvp);
+				std::vector<JSON_Value>* value_ptr = std::get_if<std::vector<JSON_Value>>(&kvp_ptr->m_value);
+				std::vector<JSON_Value>& value_ref = *value_ptr;
+				JSON_Value temp_value = value_ref[t_index];
+
+				if (std::holds_alternative<Node*>(temp_value.m_value_individual))
+				{
+					return std::get<Node*>(temp_value.m_value_individual);
+				}
+				else
+				{
+					throw "bad_type";
+				}
+			}
 		};
 
 	private:
 		std::vector<Node> main_list;
 
 	public:
+		void init_node_int(std::string key, int value)
+		{
+			Node temp_node;
+			temp_node.init_int(key, value);
+			main_list.push_back(temp_node);
+		}
 
+		int return_node_value_int()
+		{
+			return main_list[0].get_value_as_int();
+		}
+		
+		void operator[](int t_input)
+		{
+
+		}
+		void operator[](bool t_input)
+		{
+
+		}
+		void operator[](double t_input)
+		{
+
+		}
+		void operator[](std::string t_input)
+		{
+
+		}
 	};
 }
 
