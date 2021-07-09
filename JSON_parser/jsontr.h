@@ -9,6 +9,7 @@
 #include <variant>
 #include <type_traits>
 #include <sstream>
+#include <algorithm>
 
 namespace JSONator
 {
@@ -17,6 +18,7 @@ namespace JSONator
 	private:
 		class Node
 		{
+			friend class JSON_List;
 		private:
 			using var_t = std::variant<int, bool, double, std::string, Node*>;
 
@@ -433,18 +435,125 @@ namespace JSONator
 
 	private:
 		std::vector<Node> main_list;
-
-	public:
-		void init_node_int(std::string key, int value)
+	private:
+		// return integer indicating the type held in the string argument
+		// 0 = NAN, 1 = INTEGER, 2 = DOUBLE
+		int is_number(const std::string &t_string_input)
 		{
-			Node temp_node;
-			temp_node.init_int(key, value);
-			main_list.push_back(temp_node);
+			for (int i = 0; i < t_string_input.size(); i++)
+			{
+				if (!std::isdigit(static_cast<unsigned char>(t_string_input[i])))
+				{
+					return false;
+				}
+			}
 		}
 
-		int return_node_value_int()
+	public:
+		// return integer indicating the type held in the string argument
+		// 0 = NULL/SYNTAX ERROR, 1 = INTEGER, 2 = DOUBLE, 3 = BOOL, 4 = STRING, 5 = NODE
+		int check_type(std::string t_string_input)
 		{
-			return main_list[0].get_value_as_int();
+			std::string::iterator it = t_string_input.begin();
+			if (*it == ' ') // skip preceeding whitespace
+			{
+				it++;
+			}
+
+			if (*it == '"') // check for string
+			{
+				return 4;
+			}
+			else if (*it == '{') // check for object
+			{
+				return 5;
+			}
+			else if (*it == 'f' || *it == 't') // check for bool
+			{
+				std::string temp_buf;
+				for (int i = 0; i < 5; i++)
+				{
+					temp_buf.push_back(*it);
+					it++;
+				}
+			}
+
+
+		}
+
+		Node* read_object(const std::string &t_input, std::string::iterator &t_iterator)
+		{
+			Node temp_node;
+			std::string key;
+			std::string value;
+			bool reading_string = false;
+
+			while (*t_iterator != '}')
+			{
+				if (*t_iterator == ' ' && reading_string == false)
+				{
+					t_iterator++;
+				}
+
+				// read key
+				if (*t_iterator == '"')
+				{
+					reading_string = true;
+					t_iterator++;
+					while (*t_iterator != ':')
+					{
+						key.push_back(*t_iterator);
+						t_iterator++;
+					}
+				}
+				else 
+				{
+					reading_string = false;
+					while (*t_iterator != ':')
+					{
+						key.push_back(*t_iterator);
+						t_iterator++;
+					}
+				}
+
+				// read value
+				    // get value string
+				while (*t_iterator != ',')
+				{
+					value.push_back(*t_iterator);
+				}
+					// determine type
+			}
+		}
+
+		Node::JSON_KVP read_array(const std::string& t_input, std::string::iterator& t_iterator)
+		{
+
+		}
+
+
+
+		
+
+		static JSON_List parse(std::string t_json_input)
+		{
+			JSON_List temp_list;
+			std::string::iterator it = t_json_input.begin();
+			
+			if (*it != '{') { return temp_list; } // return an empty object if not reading a JSON object
+
+			while (it != t_json_input.end())
+			{
+				
+
+
+			}
+
+		}
+
+		std::string serialize()
+		{
+
 		}
 		
 		void operator[](int t_input)
