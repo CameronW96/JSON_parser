@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['read_5farray_98',['read_array',['../classcjw_1_1_j_s_o_n___list.html#ac0de9f8f367a6d43c39f2967f3f1a4ae',1,'cjw::JSON_List']]],
-  ['read_5fobject_99',['read_object',['../classcjw_1_1_j_s_o_n___list.html#a95788ce1db0a0e14335bc9b3cb709f61',1,'cjw::JSON_List']]]
+  ['parse_99',['parse',['../classcjw_1_1_j_s_o_n___list.html#a6ed9dff98fe808b0a31b5c6e9fd7b94f',1,'cjw::JSON_List']]]
 ];

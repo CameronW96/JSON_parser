@@ -1,11 +1,17 @@
 var searchData=
 [
-  ['init_24',['init',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#a6716cf68b66c2386bd30600e8460ec6b',1,'cjw::JSON_List::Node']]],
-  ['init_5farray_25',['init_array',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#ad20ac94cb8c608f9e3f7a85029268912',1,'cjw::JSON_List::Node']]],
-  ['init_5fbool_26',['init_bool',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#acd10742fc389fe537ab9cc68575e08d0',1,'cjw::JSON_List::Node']]],
-  ['init_5fdouble_27',['init_double',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#a2869e5294992658a4b70e78192d5c18e',1,'cjw::JSON_List::Node']]],
-  ['init_5fint_28',['init_int',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#a287dfad203f2b212174a5665e3c87747',1,'cjw::JSON_List::Node']]],
-  ['init_5fobject_29',['init_object',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#aa8a3a0364ca370e59ebc5934c2189eec',1,'cjw::JSON_List::Node::init_object(const std::string &amp;t_key, const Node *&amp;t_value)'],['../classcjw_1_1_j_s_o_n___list_1_1_node.html#ada3af2f93c7ed823bf4448518dfa51ba',1,'cjw::JSON_List::Node::init_object(const std::string &amp;t_key)']]],
-  ['init_5fstring_30',['init_string',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#a00dc1af1a423990c5a6eda1a44428790',1,'cjw::JSON_List::Node']]],
-  ['is_5fnumber_31',['is_number',['../classcjw_1_1_j_s_o_n___list.html#af04b7fe2c35f34c71d962744a0f10cd7',1,'cjw::JSON_List']]]
+  ['get_5farray_5fvalue_5fas_5fbool_11',['get_array_value_as_bool',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#a8ce9cc83026d2e8766ce8320b5f3b2f9',1,'cjw::JSON_List::Node']]],
+  ['get_5farray_5fvalue_5fas_5ffpoint_12',['get_array_value_as_fpoint',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#a892127109a684747bad703fa455cab2e',1,'cjw::JSON_List::Node']]],
+  ['get_5farray_5fvalue_5fas_5fint_13',['get_array_value_as_int',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#a4877be4ee768b54fa150b7519d61050b',1,'cjw::JSON_List::Node']]],
+  ['get_5farray_5fvalue_5fas_5fobject_14',['get_array_value_as_object',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#a7c8667131a715b4faa33a8f1f8898c02',1,'cjw::JSON_List::Node']]],
+  ['get_5farray_5fvalue_5fas_5fstring_15',['get_array_value_as_string',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#a70a18c8045e256b5a3f4759519c389c1',1,'cjw::JSON_List::Node']]],
+  ['get_5fkey_16',['get_key',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#a2827003546df3c4a0d1e18fa73655a7e',1,'cjw::JSON_List::Node']]],
+  ['get_5fstate_17',['get_state',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#a045bc2c41b3576e65973c94ce9929574',1,'cjw::JSON_List::Node']]],
+  ['get_5fvalue_18',['get_value',['../classcjw_1_1_j_s_o_n___list.html#a82c244379e592bf5caf5a92d8ddfb04f',1,'cjw::JSON_List']]],
+  ['get_5fvalue_5fas_5fbool_19',['get_value_as_bool',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#a7a32d7022c294144da19210d38f8bbec',1,'cjw::JSON_List::Node']]],
+  ['get_5fvalue_5fas_5ffpoint_20',['get_value_as_fpoint',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#a98b6ecd12dcf1ba8ac11cb22b4e826eb',1,'cjw::JSON_List::Node']]],
+  ['get_5fvalue_5fas_5fint_21',['get_value_as_int',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#a96fd6902a290033993495ebe80588aa6',1,'cjw::JSON_List::Node']]],
+  ['get_5fvalue_5fas_5fobject_22',['get_value_as_object',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#a1a6dd7999928ae98472c03b544ef7ece',1,'cjw::JSON_List::Node']]],
+  ['get_5fvalue_5fas_5fstring_23',['get_value_as_string',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#a33f2042cf41f39cd1684b51409bb8b29',1,'cjw::JSON_List::Node']]],
+  ['get_5fvalue_5ftype_24',['get_value_type',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#a67ca918e92764b7b9deefa24efeed87a',1,'cjw::JSON_List::Node']]]
 ];

@@ -443,7 +443,7 @@ namespace cjw
 	private:
 		// return integer indicating the type held in the string argument
 		// 0 = NAN, 1 = INTEGER, 2 = DOUBLE
-		int is_number(std::string t_string_input)
+		static int is_number(std::string t_string_input)
 		{
 			// remove whitespace from string
 			t_string_input.erase(std::remove_if(t_string_input.begin(), t_string_input.end(), ::isspace), t_string_input.end());
@@ -479,16 +479,15 @@ namespace cjw
 			}
 		}
 
-		// return integer indicating the type held in the string argument
-		// 0 = NULL/SYNTAX ERROR, 1 = INTEGER, 2 = DOUBLE, 3 = BOOL, 4 = STRING, 5 = NODE
-		int check_type(std::string t_string_input)
+		/**
+		* Determines type from string input.
+		* @param t_string_input Input string to be evaluated.
+		* @returns Integer indindicating the type held in the string argument:
+		* 0 = NULL/SYNTAX ERROR, 1 = INTEGER, 2 = DOUBLE, 3 = BOOL, 4 = STRING, 5 = NODE
+		*/
+		static int check_type(std::string t_string_input)
 		{
 			std::string::iterator it = t_string_input.begin();
-			if (*it == ' ') // skip preceeding whitespace
-			{
-				it++;
-			}
-
 			if (*it == '"') // check for string
 			{
 				return 4;
@@ -529,11 +528,9 @@ namespace cjw
 			{
 				return is_number(t_string_input);
 			}
-
-
 		}
 
-		double convert_to_double(std::string t_integer_string)
+		static double convert_to_double(std::string t_integer_string)
 		{
 			// remove whitespace
 			t_integer_string.erase(std::remove_if(t_integer_string.begin(), t_integer_string.end(), ::isspace), t_integer_string.end());
@@ -541,7 +538,7 @@ namespace cjw
 			return std::stod(t_integer_string);
 		}
 
-		int convert_to_int(std::string t_integer_string)
+		static int convert_to_int(std::string t_integer_string)
 		{
 			// remove whitespace
 			t_integer_string.erase(std::remove_if(t_integer_string.begin(), t_integer_string.end(), ::isspace), t_integer_string.end());
@@ -549,24 +546,66 @@ namespace cjw
 			return std::stoi(t_integer_string);
 		}
 
-		Node read_object(const std::string &t_object_key, const std::string& t_input, std::string::iterator& t_iterator)
+		static Node read_object(const std::string &t_object_key, const std::string& t_input, std::string::iterator& t_iterator)
 		{
 			
 		}
 
-		Node::JSON_KVP read_array(const std::string& t_input, std::string::iterator& t_iterator)
+		static Node::JSON_KVP read_array(const std::string& t_input, std::string::iterator& t_iterator)
 		{
 
 		}
 
-		/// <summary>
-		/// obtains the value from a string input 
- 		/// </summary>
-		/// <param name="t_input"></param>
-		/// <param name="t_iterator"></param>
-		/// <returns></returns>
-		Node get_value()
+		/**
+		* Removes leading and trailing white spaces from input.
+		* @param t_string_input String to be formatted
+		* @returns std::string
+		*/
+		static std::string format_value(std::string t_string_input)
 		{
+			int len_counter = 0;
+			// count leading spaces if any
+			while (t_string_input[len_counter] == ' ')
+			{
+				len_counter++;
+			}
+			// erase leading spaces if any found
+			if (len_counter > 0)
+			{
+				t_string_input.erase(0, len_counter);
+			}
+			// count trailing spaces if any
+			len_counter = 0;
+			for (int i = t_string_input.size(); i > -1; i--)
+			{
+				if (t_string_input[i] == ' ')
+				{
+					len_counter++;
+				}
+				else
+				{
+					break;
+				}
+			}
+			// erase trailing spaces if any found
+			if (len_counter > 0)
+			{
+				t_string_input.erase((t_string_input.size() - len_counter), std::string::npos);
+			}
+			return t_string_input;
+		}
+
+		/**
+		* Determines the type and extracts the value of string input.
+		* This function also calls read_array() and read_object() which contain recursive calls to get_value().
+		* This enables us to fully traverse the potential recursive tree structure contained in a Node.
+		* @param t_string_input C-string input to extract the value from.
+		* @returns A JSON_Value object.
+		*/
+		static Node::JSON_Value get_value(std::string t_value_input)
+		{
+			// format input
+			std::string value = format_value(t_value_input);
 			// take in value to check
 
 			// determine value
@@ -614,18 +653,20 @@ namespace cjw
 		{
 			JSON_List temp_list;
 			std::string::iterator it = t_json_input.begin();
-			
-			while (*it == ' ') { it++; } // skip leading white space
-			if (*it != '{') { return temp_list; } // return an empty object if not reading a JSON object
-
 			std::string key;
 			std::string value;
+			
+			while (*it == ' ') { it++; } // skip any leading white space
+			if (*it != '{') { return temp_list; } // return an empty object if not reading a JSON object
 
+			// loop through first level of structure
 			while (*it != '}')
 			{
+				// skip white space in-between blocks
 				if (*it == ' ')
 				{
 					it++;
+					continue;
 				}
 
 				// read key
@@ -648,7 +689,6 @@ namespace cjw
 				}
 
 				// read value
-					// get value string
 				while (*it != ',')
 				{
 					value.push_back(*it);
@@ -657,7 +697,7 @@ namespace cjw
 
 			}
 
-			// loop through first level of structure
+
 
 				// obtain block of data
 

@@ -1,5 +1,11 @@
 var searchData=
 [
-  ['json_5fkvp_93',['JSON_KVP',['../classcjw_1_1_j_s_o_n___list_1_1_node_1_1_j_s_o_n___k_v_p.html#a3d2f5134a87d5a2eaf3f43e30cf1bd1e',1,'cjw::JSON_List::Node::JSON_KVP']]],
-  ['json_5fvalue_94',['JSON_Value',['../classcjw_1_1_j_s_o_n___list_1_1_node_1_1_j_s_o_n___value.html#a7f10da27ec891ea444158acbffaf2c08',1,'cjw::JSON_List::Node::JSON_Value::JSON_Value()'],['../classcjw_1_1_j_s_o_n___list_1_1_node_1_1_j_s_o_n___value.html#abc1b5bc5b1bcc68bec27d1dee1965cd1',1,'cjw::JSON_List::Node::JSON_Value::JSON_Value(const JSON_Value &amp;t_copy)']]]
+  ['init_87',['init',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#a6716cf68b66c2386bd30600e8460ec6b',1,'cjw::JSON_List::Node']]],
+  ['init_5farray_88',['init_array',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#ad20ac94cb8c608f9e3f7a85029268912',1,'cjw::JSON_List::Node']]],
+  ['init_5fbool_89',['init_bool',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#acd10742fc389fe537ab9cc68575e08d0',1,'cjw::JSON_List::Node']]],
+  ['init_5fdouble_90',['init_double',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#a2869e5294992658a4b70e78192d5c18e',1,'cjw::JSON_List::Node']]],
+  ['init_5fint_91',['init_int',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#a287dfad203f2b212174a5665e3c87747',1,'cjw::JSON_List::Node']]],
+  ['init_5fobject_92',['init_object',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#aa8a3a0364ca370e59ebc5934c2189eec',1,'cjw::JSON_List::Node::init_object(const std::string &amp;t_key, const Node *&amp;t_value)'],['../classcjw_1_1_j_s_o_n___list_1_1_node.html#ada3af2f93c7ed823bf4448518dfa51ba',1,'cjw::JSON_List::Node::init_object(const std::string &amp;t_key)']]],
+  ['init_5fstring_93',['init_string',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#a00dc1af1a423990c5a6eda1a44428790',1,'cjw::JSON_List::Node']]],
+  ['is_5fnumber_94',['is_number',['../classcjw_1_1_j_s_o_n___list.html#af04b7fe2c35f34c71d962744a0f10cd7',1,'cjw::JSON_List']]]
 ];

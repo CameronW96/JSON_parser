@@ -138,9 +138,12 @@ Private Member Functions</h2></td></tr>
 <tr class="separator:a95788ce1db0a0e14335bc9b3cb709f61"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac0de9f8f367a6d43c39f2967f3f1a4ae"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classcjw_1_1_j_s_o_n___list_1_1_node_1_1_j_s_o_n___k_v_p.html">Node::JSON_KVP</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcjw_1_1_j_s_o_n___list.html#ac0de9f8f367a6d43c39f2967f3f1a4ae">read_array</a> (const std::string &amp;t_input, std::string::iterator &amp;t_iterator)</td></tr>
 <tr class="separator:ac0de9f8f367a6d43c39f2967f3f1a4ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af7df17435a54ed4dcc9dec643835ff2e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classcjw_1_1_j_s_o_n___list_1_1_node.html">Node</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcjw_1_1_j_s_o_n___list.html#af7df17435a54ed4dcc9dec643835ff2e">get_value</a> ()</td></tr>
-<tr class="memdesc:af7df17435a54ed4dcc9dec643835ff2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">obtains the value from a string input  <a href="classcjw_1_1_j_s_o_n___list.html#af7df17435a54ed4dcc9dec643835ff2e">More...</a><br /></td></tr>
-<tr class="separator:af7df17435a54ed4dcc9dec643835ff2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a78d29a92ca6e041a9952c0efae57c990"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcjw_1_1_j_s_o_n___list.html#a78d29a92ca6e041a9952c0efae57c990">format_value</a> (std::string t_string_input)</td></tr>
+<tr class="memdesc:a78d29a92ca6e041a9952c0efae57c990"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes leading and trailing white spaces from input.  <a href="classcjw_1_1_j_s_o_n___list.html#a78d29a92ca6e041a9952c0efae57c990">More...</a><br /></td></tr>
+<tr class="separator:a78d29a92ca6e041a9952c0efae57c990"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a82c244379e592bf5caf5a92d8ddfb04f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classcjw_1_1_j_s_o_n___list_1_1_node_1_1_j_s_o_n___value.html">Node::JSON_Value</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcjw_1_1_j_s_o_n___list.html#a82c244379e592bf5caf5a92d8ddfb04f">get_value</a> (std::string t_value_input)</td></tr>
+<tr class="memdesc:a82c244379e592bf5caf5a92d8ddfb04f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines the type and extracts the value of string input.  <a href="classcjw_1_1_j_s_o_n___list.html#a82c244379e592bf5caf5a92d8ddfb04f">More...</a><br /></td></tr>
+<tr class="separator:a82c244379e592bf5caf5a92d8ddfb04f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
@@ -226,8 +229,8 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="af7df17435a54ed4dcc9dec643835ff2e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af7df17435a54ed4dcc9dec643835ff2e">&#9670;&nbsp;</a></span>get_value()</h2>
+<a id="a78d29a92ca6e041a9952c0efae57c990"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a78d29a92ca6e041a9952c0efae57c990">&#9670;&nbsp;</a></span>format_value()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -236,9 +239,10 @@ Private Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classcjw_1_1_j_s_o_n___list_1_1_node.html">Node</a> cjw::JSON_List::get_value </td>
+          <td class="memname">std::string cjw::JSON_List::format_value </td>
           <td>(</td>
-          <td class="paramname"></td><td>)</td>
+          <td class="paramtype">std::string&#160;</td>
+          <td class="paramname"><em>t_string_input</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -249,15 +253,49 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>obtains the value from a string input </p>
+<p>Removes leading and trailing white spaces from input. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">t_input</td><td></td></tr>
-    <tr><td class="paramname">t_iterator</td><td></td></tr>
+    <tr><td class="paramname">t_string_input</td><td>String to be formatted </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd></dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>string object </dd></dl>
+
+</div>
+</div>
+<a id="a82c244379e592bf5caf5a92d8ddfb04f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a82c244379e592bf5caf5a92d8ddfb04f">&#9670;&nbsp;</a></span>get_value()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classcjw_1_1_j_s_o_n___list_1_1_node_1_1_j_s_o_n___value.html">Node::JSON_Value</a> cjw::JSON_List::get_value </td>
+          <td>(</td>
+          <td class="paramtype">std::string&#160;</td>
+          <td class="paramname"><em>t_value_input</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Determines the type and extracts the value of string input. </p>
+<p>This function also calls <a class="el" href="classcjw_1_1_j_s_o_n___list.html#ac0de9f8f367a6d43c39f2967f3f1a4ae">read_array()</a> and <a class="el" href="classcjw_1_1_j_s_o_n___list.html#a95788ce1db0a0e14335bc9b3cb709f61">read_object()</a> which contain recursive calls to <a class="el" href="classcjw_1_1_j_s_o_n___list.html#a82c244379e592bf5caf5a92d8ddfb04f" title="Determines the type and extracts the value of string input.">get_value()</a>. This enables us to fully traverse the potential recursive tree structure contained in a <a class="el" href="classcjw_1_1_j_s_o_n___list_1_1_node.html">Node</a>. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">t_string_input</td><td>C-string input to extract the value from. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A JSON_Value object. </dd></dl>
 
 </div>
 </div>
@@ -320,7 +358,7 @@ Private Attributes</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A <a class="el" href="classcjw_1_1_j_s_o_n___list.html">JSON_List</a> object that can be used to initialize another <a class="el" href="classcjw_1_1_j_s_o_n___list.html">JSON_List</a> object. </dd></dl>
 <dl class="section warning"><dt>Warning</dt><dd>If your JSON object is held in a char[] buffer it must first be converted to std::string. </dd></dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="classcjw_1_1_j_s_o_n___list.html#af7df17435a54ed4dcc9dec643835ff2e" title="obtains the value from a string input">get_value()</a>, <a class="el" href="classcjw_1_1_j_s_o_n___list.html#ac0de9f8f367a6d43c39f2967f3f1a4ae">read_array()</a>, <a class="el" href="classcjw_1_1_j_s_o_n___list.html#a95788ce1db0a0e14335bc9b3cb709f61">read_object()</a> </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="classcjw_1_1_j_s_o_n___list.html#a82c244379e592bf5caf5a92d8ddfb04f" title="Determines the type and extracts the value of string input.">get_value()</a>, <a class="el" href="classcjw_1_1_j_s_o_n___list.html#ac0de9f8f367a6d43c39f2967f3f1a4ae">read_array()</a>, <a class="el" href="classcjw_1_1_j_s_o_n___list.html#a95788ce1db0a0e14335bc9b3cb709f61">read_object()</a> </dd></dl>
 
 </div>
 </div>

@@ -649,116 +649,146 @@ $(document).ready(function(){initNavTree('jsontr_8h_source.html',''); initResiza
 <div class="line"><a name="l00559"></a><span class="lineno">  559</span>&#160; </div>
 <div class="line"><a name="l00560"></a><span class="lineno">  560</span>&#160;        }</div>
 <div class="line"><a name="l00561"></a><span class="lineno">  561</span>&#160; </div>
-<div class="line"><a name="l00568"></a><span class="lineno"><a class="line" href="classcjw_1_1_j_s_o_n___list.html#af7df17435a54ed4dcc9dec643835ff2e">  568</a></span>&#160;        <a class="code" href="classcjw_1_1_j_s_o_n___list_1_1_node.html">Node</a> <a class="code" href="classcjw_1_1_j_s_o_n___list.html#af7df17435a54ed4dcc9dec643835ff2e">get_value</a>()</div>
-<div class="line"><a name="l00569"></a><span class="lineno">  569</span>&#160;        {</div>
-<div class="line"><a name="l00570"></a><span class="lineno">  570</span>&#160;            <span class="comment">// take in value to check</span></div>
-<div class="line"><a name="l00571"></a><span class="lineno">  571</span>&#160; </div>
-<div class="line"><a name="l00572"></a><span class="lineno">  572</span>&#160;            <span class="comment">// determine value</span></div>
-<div class="line"><a name="l00573"></a><span class="lineno">  573</span>&#160;            <span class="keywordtype">int</span> type = <a class="code" href="classcjw_1_1_j_s_o_n___list.html#aa724a1c9b7dba80a3c678b11ec3246f0">check_type</a>(value);</div>
-<div class="line"><a name="l00574"></a><span class="lineno">  574</span>&#160; </div>
-<div class="line"><a name="l00575"></a><span class="lineno">  575</span>&#160;            <span class="keywordflow">switch</span> (type)</div>
-<div class="line"><a name="l00576"></a><span class="lineno">  576</span>&#160;            {</div>
-<div class="line"><a name="l00577"></a><span class="lineno">  577</span>&#160;            <span class="keywordflow">case</span> 0: <span class="comment">// invalid input</span></div>
+<div class="line"><a name="l00567"></a><span class="lineno"><a class="line" href="classcjw_1_1_j_s_o_n___list.html#a78d29a92ca6e041a9952c0efae57c990">  567</a></span>&#160;        std::string <a class="code" href="classcjw_1_1_j_s_o_n___list.html#a78d29a92ca6e041a9952c0efae57c990">format_value</a>(std::string t_string_input)</div>
+<div class="line"><a name="l00568"></a><span class="lineno">  568</span>&#160;        {</div>
+<div class="line"><a name="l00569"></a><span class="lineno">  569</span>&#160;            std::string::iterator it = t_string_input.begin();</div>
+<div class="line"><a name="l00570"></a><span class="lineno">  570</span>&#160;            <span class="comment">// find end of leading spaces</span></div>
+<div class="line"><a name="l00571"></a><span class="lineno">  571</span>&#160;            <span class="keywordflow">while</span> (*it == <span class="charliteral">&#39; &#39;</span>)</div>
+<div class="line"><a name="l00572"></a><span class="lineno">  572</span>&#160;            {</div>
+<div class="line"><a name="l00573"></a><span class="lineno">  573</span>&#160;                it++;</div>
+<div class="line"><a name="l00574"></a><span class="lineno">  574</span>&#160;            }</div>
+<div class="line"><a name="l00575"></a><span class="lineno">  575</span>&#160; </div>
+<div class="line"><a name="l00576"></a><span class="lineno">  576</span>&#160;            <span class="comment">// erase leading spaces if any found</span></div>
+<div class="line"><a name="l00577"></a><span class="lineno">  577</span>&#160;            <span class="keywordflow">if</span> (it != t_string_input.begin())</div>
 <div class="line"><a name="l00578"></a><span class="lineno">  578</span>&#160;            {</div>
-<div class="line"><a name="l00579"></a><span class="lineno">  579</span>&#160;                <a class="code" href="classcjw_1_1_j_s_o_n___list_1_1_node.html">Node</a> empty_object;</div>
-<div class="line"><a name="l00580"></a><span class="lineno">  580</span>&#160;                empty_object.<a class="code" href="classcjw_1_1_j_s_o_n___list_1_1_node.html#aa8a3a0364ca370e59ebc5934c2189eec">init_object</a>(t_object_key);</div>
-<div class="line"><a name="l00581"></a><span class="lineno">  581</span>&#160;                <span class="keywordflow">return</span> empty_object; <span class="comment">// return empty object</span></div>
-<div class="line"><a name="l00582"></a><span class="lineno">  582</span>&#160;                <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00583"></a><span class="lineno">  583</span>&#160;            }</div>
-<div class="line"><a name="l00584"></a><span class="lineno">  584</span>&#160;            <span class="keywordflow">case</span> 1: <span class="comment">// integer</span></div>
+<div class="line"><a name="l00579"></a><span class="lineno">  579</span>&#160;                t_string_input.erase(t_string_input.begin(), it);</div>
+<div class="line"><a name="l00580"></a><span class="lineno">  580</span>&#160;            }</div>
+<div class="line"><a name="l00581"></a><span class="lineno">  581</span>&#160; </div>
+<div class="line"><a name="l00582"></a><span class="lineno">  582</span>&#160;            it = t_string_input.end();</div>
+<div class="line"><a name="l00583"></a><span class="lineno">  583</span>&#160;            <span class="comment">// count trailing spaces</span></div>
+<div class="line"><a name="l00584"></a><span class="lineno">  584</span>&#160;            <span class="keywordflow">while</span> (*it == <span class="charliteral">&#39; &#39;</span>)</div>
 <div class="line"><a name="l00585"></a><span class="lineno">  585</span>&#160;            {</div>
-<div class="line"><a name="l00586"></a><span class="lineno">  586</span>&#160;                <a class="code" href="classcjw_1_1_j_s_o_n___list_1_1_node.html">Node</a> temp_integer_node;</div>
-<div class="line"><a name="l00587"></a><span class="lineno">  587</span>&#160;                temp_integer_node.<a class="code" href="classcjw_1_1_j_s_o_n___list_1_1_node.html#a287dfad203f2b212174a5665e3c87747">init_int</a>(key, <a class="code" href="classcjw_1_1_j_s_o_n___list.html#a99c097cff47bcbe7a5887ea6f318c2a7">convert_to_int</a>(value));</div>
-<div class="line"><a name="l00588"></a><span class="lineno">  588</span>&#160;                node_return_object.object_push(temp_integer_node); <span class="comment">// node or KVP??</span></div>
-<div class="line"><a name="l00589"></a><span class="lineno">  589</span>&#160;                <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00590"></a><span class="lineno">  590</span>&#160;            }</div>
-<div class="line"><a name="l00591"></a><span class="lineno">  591</span>&#160;            <span class="keywordflow">case</span> 2: <span class="comment">// double</span></div>
-<div class="line"><a name="l00592"></a><span class="lineno">  592</span>&#160;            {</div>
-<div class="line"><a name="l00593"></a><span class="lineno">  593</span>&#160;                <a class="code" href="classcjw_1_1_j_s_o_n___list_1_1_node.html">Node</a> temp_double_node;</div>
-<div class="line"><a name="l00594"></a><span class="lineno">  594</span>&#160;                temp_double_node.<a class="code" href="classcjw_1_1_j_s_o_n___list_1_1_node.html#a2869e5294992658a4b70e78192d5c18e">init_double</a>(key, <a class="code" href="classcjw_1_1_j_s_o_n___list.html#a6bd70cd89261eb1e2cc4dd985761e904">convert_to_double</a>(value));</div>
-<div class="line"><a name="l00595"></a><span class="lineno">  595</span>&#160;                <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00596"></a><span class="lineno">  596</span>&#160;            }</div>
-<div class="line"><a name="l00597"></a><span class="lineno">  597</span>&#160;            }</div>
-<div class="line"><a name="l00598"></a><span class="lineno">  598</span>&#160;            <span class="comment">// call appropriate read function</span></div>
-<div class="line"><a name="l00599"></a><span class="lineno">  599</span>&#160; </div>
-<div class="line"><a name="l00600"></a><span class="lineno">  600</span>&#160;                <span class="comment">// read function recursively calls get_value() if it encounters an array or object</span></div>
-<div class="line"><a name="l00601"></a><span class="lineno">  601</span>&#160;                </div>
-<div class="line"><a name="l00602"></a><span class="lineno">  602</span>&#160;        }</div>
-<div class="line"><a name="l00603"></a><span class="lineno">  603</span>&#160; </div>
-<div class="line"><a name="l00604"></a><span class="lineno">  604</span>&#160;    <span class="keyword">public</span>:</div>
-<div class="line"><a name="l00613"></a><span class="lineno"><a class="line" href="classcjw_1_1_j_s_o_n___list.html#a6ed9dff98fe808b0a31b5c6e9fd7b94f">  613</a></span>&#160;        <span class="keyword">static</span> <a class="code" href="classcjw_1_1_j_s_o_n___list.html">JSON_List</a> <a class="code" href="classcjw_1_1_j_s_o_n___list.html#a6ed9dff98fe808b0a31b5c6e9fd7b94f">parse</a>(std::string t_json_input)</div>
-<div class="line"><a name="l00614"></a><span class="lineno">  614</span>&#160;        {</div>
-<div class="line"><a name="l00615"></a><span class="lineno">  615</span>&#160;            <a class="code" href="classcjw_1_1_j_s_o_n___list.html">JSON_List</a> temp_list;</div>
-<div class="line"><a name="l00616"></a><span class="lineno">  616</span>&#160;            std::string::iterator it = t_json_input.begin();</div>
-<div class="line"><a name="l00617"></a><span class="lineno">  617</span>&#160;            </div>
-<div class="line"><a name="l00618"></a><span class="lineno">  618</span>&#160;            <span class="keywordflow">while</span> (*it == <span class="charliteral">&#39; &#39;</span>) { it++; } <span class="comment">// skip leading white space</span></div>
-<div class="line"><a name="l00619"></a><span class="lineno">  619</span>&#160;            <span class="keywordflow">if</span> (*it != <span class="charliteral">&#39;{&#39;</span>) { <span class="keywordflow">return</span> temp_list; } <span class="comment">// return an empty object if not reading a JSON object</span></div>
-<div class="line"><a name="l00620"></a><span class="lineno">  620</span>&#160; </div>
-<div class="line"><a name="l00621"></a><span class="lineno">  621</span>&#160;            std::string key;</div>
-<div class="line"><a name="l00622"></a><span class="lineno">  622</span>&#160;            std::string value;</div>
-<div class="line"><a name="l00623"></a><span class="lineno">  623</span>&#160; </div>
-<div class="line"><a name="l00624"></a><span class="lineno">  624</span>&#160;            <span class="keywordflow">while</span> (*it != <span class="charliteral">&#39;}&#39;</span>)</div>
-<div class="line"><a name="l00625"></a><span class="lineno">  625</span>&#160;            {</div>
-<div class="line"><a name="l00626"></a><span class="lineno">  626</span>&#160;                <span class="keywordflow">if</span> (*it == <span class="charliteral">&#39; &#39;</span>)</div>
-<div class="line"><a name="l00627"></a><span class="lineno">  627</span>&#160;                {</div>
-<div class="line"><a name="l00628"></a><span class="lineno">  628</span>&#160;                    it++;</div>
-<div class="line"><a name="l00629"></a><span class="lineno">  629</span>&#160;                }</div>
-<div class="line"><a name="l00630"></a><span class="lineno">  630</span>&#160; </div>
-<div class="line"><a name="l00631"></a><span class="lineno">  631</span>&#160;                <span class="comment">// read key</span></div>
-<div class="line"><a name="l00632"></a><span class="lineno">  632</span>&#160;                <span class="keywordflow">if</span> (*it == <span class="charliteral">&#39;&quot;&#39;</span>)</div>
-<div class="line"><a name="l00633"></a><span class="lineno">  633</span>&#160;                {</div>
-<div class="line"><a name="l00634"></a><span class="lineno">  634</span>&#160;                    it++;</div>
-<div class="line"><a name="l00635"></a><span class="lineno">  635</span>&#160;                    <span class="keywordflow">while</span> (*it != <span class="charliteral">&#39;&quot;&#39;</span>)</div>
-<div class="line"><a name="l00636"></a><span class="lineno">  636</span>&#160;                    {</div>
-<div class="line"><a name="l00637"></a><span class="lineno">  637</span>&#160;                        key.push_back(*it);</div>
-<div class="line"><a name="l00638"></a><span class="lineno">  638</span>&#160;                        it++;</div>
-<div class="line"><a name="l00639"></a><span class="lineno">  639</span>&#160;                    }</div>
-<div class="line"><a name="l00640"></a><span class="lineno">  640</span>&#160;                }</div>
-<div class="line"><a name="l00641"></a><span class="lineno">  641</span>&#160;                <span class="keywordflow">else</span></div>
-<div class="line"><a name="l00642"></a><span class="lineno">  642</span>&#160;                {</div>
-<div class="line"><a name="l00643"></a><span class="lineno">  643</span>&#160;                    <span class="keywordflow">while</span> (*it != <span class="charliteral">&#39;:&#39;</span>)</div>
-<div class="line"><a name="l00644"></a><span class="lineno">  644</span>&#160;                    {</div>
-<div class="line"><a name="l00645"></a><span class="lineno">  645</span>&#160;                        key.push_back(*it);</div>
-<div class="line"><a name="l00646"></a><span class="lineno">  646</span>&#160;                        it++;</div>
-<div class="line"><a name="l00647"></a><span class="lineno">  647</span>&#160;                    }</div>
-<div class="line"><a name="l00648"></a><span class="lineno">  648</span>&#160;                }</div>
-<div class="line"><a name="l00649"></a><span class="lineno">  649</span>&#160; </div>
-<div class="line"><a name="l00650"></a><span class="lineno">  650</span>&#160;                <span class="comment">// read value</span></div>
-<div class="line"><a name="l00651"></a><span class="lineno">  651</span>&#160;                    <span class="comment">// get value string</span></div>
-<div class="line"><a name="l00652"></a><span class="lineno">  652</span>&#160;                <span class="keywordflow">while</span> (*it != <span class="charliteral">&#39;,&#39;</span>)</div>
-<div class="line"><a name="l00653"></a><span class="lineno">  653</span>&#160;                {</div>
-<div class="line"><a name="l00654"></a><span class="lineno">  654</span>&#160;                    value.push_back(*it);</div>
-<div class="line"><a name="l00655"></a><span class="lineno">  655</span>&#160;                    it++;</div>
-<div class="line"><a name="l00656"></a><span class="lineno">  656</span>&#160;                }</div>
+<div class="line"><a name="l00586"></a><span class="lineno">  586</span>&#160;                it--;</div>
+<div class="line"><a name="l00587"></a><span class="lineno">  587</span>&#160;            }</div>
+<div class="line"><a name="l00588"></a><span class="lineno">  588</span>&#160; </div>
+<div class="line"><a name="l00589"></a><span class="lineno">  589</span>&#160;            <span class="comment">// erase trailing spaces if any found</span></div>
+<div class="line"><a name="l00590"></a><span class="lineno">  590</span>&#160;            <span class="keywordflow">if</span> (it != t_string_input.end())</div>
+<div class="line"><a name="l00591"></a><span class="lineno">  591</span>&#160;            {</div>
+<div class="line"><a name="l00592"></a><span class="lineno">  592</span>&#160;                t_string_input.erase(it, t_string_input.end()); <span class="comment">// does not dereference t_string_input.end()</span></div>
+<div class="line"><a name="l00593"></a><span class="lineno">  593</span>&#160;            }</div>
+<div class="line"><a name="l00594"></a><span class="lineno">  594</span>&#160;        }</div>
+<div class="line"><a name="l00595"></a><span class="lineno">  595</span>&#160; </div>
+<div class="line"><a name="l00603"></a><span class="lineno"><a class="line" href="classcjw_1_1_j_s_o_n___list.html#a82c244379e592bf5caf5a92d8ddfb04f">  603</a></span>&#160;        <a class="code" href="classcjw_1_1_j_s_o_n___list_1_1_node_1_1_j_s_o_n___value.html">Node::JSON_Value</a> <a class="code" href="classcjw_1_1_j_s_o_n___list.html#a82c244379e592bf5caf5a92d8ddfb04f">get_value</a>(std::string t_value_input)</div>
+<div class="line"><a name="l00604"></a><span class="lineno">  604</span>&#160;        {</div>
+<div class="line"><a name="l00605"></a><span class="lineno">  605</span>&#160;            <span class="comment">// take in value to check</span></div>
+<div class="line"><a name="l00606"></a><span class="lineno">  606</span>&#160; </div>
+<div class="line"><a name="l00607"></a><span class="lineno">  607</span>&#160;            <span class="comment">// determine value</span></div>
+<div class="line"><a name="l00608"></a><span class="lineno">  608</span>&#160;            <span class="keywordtype">int</span> type = <a class="code" href="classcjw_1_1_j_s_o_n___list.html#aa724a1c9b7dba80a3c678b11ec3246f0">check_type</a>(value);</div>
+<div class="line"><a name="l00609"></a><span class="lineno">  609</span>&#160; </div>
+<div class="line"><a name="l00610"></a><span class="lineno">  610</span>&#160;            <span class="keywordflow">switch</span> (type)</div>
+<div class="line"><a name="l00611"></a><span class="lineno">  611</span>&#160;            {</div>
+<div class="line"><a name="l00612"></a><span class="lineno">  612</span>&#160;            <span class="keywordflow">case</span> 0: <span class="comment">// invalid input</span></div>
+<div class="line"><a name="l00613"></a><span class="lineno">  613</span>&#160;            {</div>
+<div class="line"><a name="l00614"></a><span class="lineno">  614</span>&#160;                <a class="code" href="classcjw_1_1_j_s_o_n___list_1_1_node.html">Node</a> empty_object;</div>
+<div class="line"><a name="l00615"></a><span class="lineno">  615</span>&#160;                empty_object.<a class="code" href="classcjw_1_1_j_s_o_n___list_1_1_node.html#aa8a3a0364ca370e59ebc5934c2189eec">init_object</a>(t_object_key);</div>
+<div class="line"><a name="l00616"></a><span class="lineno">  616</span>&#160;                <span class="keywordflow">return</span> empty_object; <span class="comment">// return empty object</span></div>
+<div class="line"><a name="l00617"></a><span class="lineno">  617</span>&#160;                <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00618"></a><span class="lineno">  618</span>&#160;            }</div>
+<div class="line"><a name="l00619"></a><span class="lineno">  619</span>&#160;            <span class="keywordflow">case</span> 1: <span class="comment">// integer</span></div>
+<div class="line"><a name="l00620"></a><span class="lineno">  620</span>&#160;            {</div>
+<div class="line"><a name="l00621"></a><span class="lineno">  621</span>&#160;                <a class="code" href="classcjw_1_1_j_s_o_n___list_1_1_node.html">Node</a> temp_integer_node;</div>
+<div class="line"><a name="l00622"></a><span class="lineno">  622</span>&#160;                temp_integer_node.<a class="code" href="classcjw_1_1_j_s_o_n___list_1_1_node.html#a287dfad203f2b212174a5665e3c87747">init_int</a>(key, <a class="code" href="classcjw_1_1_j_s_o_n___list.html#a99c097cff47bcbe7a5887ea6f318c2a7">convert_to_int</a>(value));</div>
+<div class="line"><a name="l00623"></a><span class="lineno">  623</span>&#160;                node_return_object.object_push(temp_integer_node); <span class="comment">// node or KVP??</span></div>
+<div class="line"><a name="l00624"></a><span class="lineno">  624</span>&#160;                <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00625"></a><span class="lineno">  625</span>&#160;            }</div>
+<div class="line"><a name="l00626"></a><span class="lineno">  626</span>&#160;            <span class="keywordflow">case</span> 2: <span class="comment">// double</span></div>
+<div class="line"><a name="l00627"></a><span class="lineno">  627</span>&#160;            {</div>
+<div class="line"><a name="l00628"></a><span class="lineno">  628</span>&#160;                <a class="code" href="classcjw_1_1_j_s_o_n___list_1_1_node.html">Node</a> temp_double_node;</div>
+<div class="line"><a name="l00629"></a><span class="lineno">  629</span>&#160;                temp_double_node.<a class="code" href="classcjw_1_1_j_s_o_n___list_1_1_node.html#a2869e5294992658a4b70e78192d5c18e">init_double</a>(key, <a class="code" href="classcjw_1_1_j_s_o_n___list.html#a6bd70cd89261eb1e2cc4dd985761e904">convert_to_double</a>(value));</div>
+<div class="line"><a name="l00630"></a><span class="lineno">  630</span>&#160;                <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00631"></a><span class="lineno">  631</span>&#160;            }</div>
+<div class="line"><a name="l00632"></a><span class="lineno">  632</span>&#160;            }</div>
+<div class="line"><a name="l00633"></a><span class="lineno">  633</span>&#160;            <span class="comment">// call appropriate read function</span></div>
+<div class="line"><a name="l00634"></a><span class="lineno">  634</span>&#160; </div>
+<div class="line"><a name="l00635"></a><span class="lineno">  635</span>&#160;                <span class="comment">// read function recursively calls get_value() if it encounters an array or object</span></div>
+<div class="line"><a name="l00636"></a><span class="lineno">  636</span>&#160;                </div>
+<div class="line"><a name="l00637"></a><span class="lineno">  637</span>&#160;        }</div>
+<div class="line"><a name="l00638"></a><span class="lineno">  638</span>&#160; </div>
+<div class="line"><a name="l00639"></a><span class="lineno">  639</span>&#160;    <span class="keyword">public</span>:</div>
+<div class="line"><a name="l00648"></a><span class="lineno"><a class="line" href="classcjw_1_1_j_s_o_n___list.html#a6ed9dff98fe808b0a31b5c6e9fd7b94f">  648</a></span>&#160;        <span class="keyword">static</span> <a class="code" href="classcjw_1_1_j_s_o_n___list.html">JSON_List</a> <a class="code" href="classcjw_1_1_j_s_o_n___list.html#a6ed9dff98fe808b0a31b5c6e9fd7b94f">parse</a>(std::string t_json_input)</div>
+<div class="line"><a name="l00649"></a><span class="lineno">  649</span>&#160;        {</div>
+<div class="line"><a name="l00650"></a><span class="lineno">  650</span>&#160;            <a class="code" href="classcjw_1_1_j_s_o_n___list.html">JSON_List</a> temp_list;</div>
+<div class="line"><a name="l00651"></a><span class="lineno">  651</span>&#160;            std::string::iterator it = t_json_input.begin();</div>
+<div class="line"><a name="l00652"></a><span class="lineno">  652</span>&#160;            std::string key;</div>
+<div class="line"><a name="l00653"></a><span class="lineno">  653</span>&#160;            std::string value;</div>
+<div class="line"><a name="l00654"></a><span class="lineno">  654</span>&#160;            </div>
+<div class="line"><a name="l00655"></a><span class="lineno">  655</span>&#160;            <span class="keywordflow">while</span> (*it == <span class="charliteral">&#39; &#39;</span>) { it++; } <span class="comment">// skip any leading white space</span></div>
+<div class="line"><a name="l00656"></a><span class="lineno">  656</span>&#160;            <span class="keywordflow">if</span> (*it != <span class="charliteral">&#39;{&#39;</span>) { <span class="keywordflow">return</span> temp_list; } <span class="comment">// return an empty object if not reading a JSON object</span></div>
 <div class="line"><a name="l00657"></a><span class="lineno">  657</span>&#160; </div>
-<div class="line"><a name="l00658"></a><span class="lineno">  658</span>&#160;            }</div>
-<div class="line"><a name="l00659"></a><span class="lineno">  659</span>&#160; </div>
-<div class="line"><a name="l00660"></a><span class="lineno">  660</span>&#160;            <span class="comment">// loop through first level of structure</span></div>
-<div class="line"><a name="l00661"></a><span class="lineno">  661</span>&#160; </div>
-<div class="line"><a name="l00662"></a><span class="lineno">  662</span>&#160;                <span class="comment">// obtain block of data</span></div>
-<div class="line"><a name="l00663"></a><span class="lineno">  663</span>&#160; </div>
-<div class="line"><a name="l00664"></a><span class="lineno">  664</span>&#160;                <span class="comment">// create temp node</span></div>
-<div class="line"><a name="l00665"></a><span class="lineno">  665</span>&#160; </div>
-<div class="line"><a name="l00666"></a><span class="lineno">  666</span>&#160;                <span class="comment">// separate key from block and store in temp node</span></div>
+<div class="line"><a name="l00658"></a><span class="lineno">  658</span>&#160;            <span class="comment">// loop through first level of structure</span></div>
+<div class="line"><a name="l00659"></a><span class="lineno">  659</span>&#160;            <span class="keywordflow">while</span> (*it != <span class="charliteral">&#39;}&#39;</span>)</div>
+<div class="line"><a name="l00660"></a><span class="lineno">  660</span>&#160;            {</div>
+<div class="line"><a name="l00661"></a><span class="lineno">  661</span>&#160;                <span class="comment">// skip white space in-between blocks</span></div>
+<div class="line"><a name="l00662"></a><span class="lineno">  662</span>&#160;                <span class="keywordflow">if</span> (*it == <span class="charliteral">&#39; &#39;</span>)</div>
+<div class="line"><a name="l00663"></a><span class="lineno">  663</span>&#160;                {</div>
+<div class="line"><a name="l00664"></a><span class="lineno">  664</span>&#160;                    it++;</div>
+<div class="line"><a name="l00665"></a><span class="lineno">  665</span>&#160;                    <span class="keywordflow">continue</span>;</div>
+<div class="line"><a name="l00666"></a><span class="lineno">  666</span>&#160;                }</div>
 <div class="line"><a name="l00667"></a><span class="lineno">  667</span>&#160; </div>
-<div class="line"><a name="l00668"></a><span class="lineno">  668</span>&#160;                <span class="comment">// separate value from block</span></div>
-<div class="line"><a name="l00669"></a><span class="lineno">  669</span>&#160; </div>
-<div class="line"><a name="l00670"></a><span class="lineno">  670</span>&#160;                <span class="comment">// call get_value and pass value from block</span></div>
-<div class="line"><a name="l00671"></a><span class="lineno">  671</span>&#160;                    </div>
-<div class="line"><a name="l00672"></a><span class="lineno">  672</span>&#160;                    <span class="comment">// </span></div>
-<div class="line"><a name="l00673"></a><span class="lineno">  673</span>&#160; </div>
-<div class="line"><a name="l00674"></a><span class="lineno">  674</span>&#160;        }</div>
-<div class="line"><a name="l00675"></a><span class="lineno">  675</span>&#160; </div>
-<div class="line"><a name="l00680"></a><span class="lineno"><a class="line" href="classcjw_1_1_j_s_o_n___list.html#a1aa1b3b819a3d1ac34c0e43a54f2b1b0">  680</a></span>&#160;        std::string <a class="code" href="classcjw_1_1_j_s_o_n___list.html#a1aa1b3b819a3d1ac34c0e43a54f2b1b0">serialize</a>()</div>
-<div class="line"><a name="l00681"></a><span class="lineno">  681</span>&#160;        {</div>
-<div class="line"><a name="l00682"></a><span class="lineno">  682</span>&#160; </div>
-<div class="line"><a name="l00683"></a><span class="lineno">  683</span>&#160;        }</div>
-<div class="line"><a name="l00684"></a><span class="lineno">  684</span>&#160;        </div>
-<div class="line"><a name="l00685"></a><span class="lineno">  685</span>&#160;    };</div>
-<div class="line"><a name="l00686"></a><span class="lineno">  686</span>&#160;}</div>
-<div class="line"><a name="l00687"></a><span class="lineno">  687</span>&#160; </div>
-<div class="line"><a name="l00688"></a><span class="lineno">  688</span>&#160;<span class="preprocessor">#endif </span><span class="comment">// !jsontr.h</span></div>
-<div class="line"><a name="l00689"></a><span class="lineno">  689</span>&#160; </div>
+<div class="line"><a name="l00668"></a><span class="lineno">  668</span>&#160;                <span class="comment">// read key</span></div>
+<div class="line"><a name="l00669"></a><span class="lineno">  669</span>&#160;                <span class="keywordflow">if</span> (*it == <span class="charliteral">&#39;&quot;&#39;</span>)</div>
+<div class="line"><a name="l00670"></a><span class="lineno">  670</span>&#160;                {</div>
+<div class="line"><a name="l00671"></a><span class="lineno">  671</span>&#160;                    it++;</div>
+<div class="line"><a name="l00672"></a><span class="lineno">  672</span>&#160;                    <span class="keywordflow">while</span> (*it != <span class="charliteral">&#39;&quot;&#39;</span>)</div>
+<div class="line"><a name="l00673"></a><span class="lineno">  673</span>&#160;                    {</div>
+<div class="line"><a name="l00674"></a><span class="lineno">  674</span>&#160;                        key.push_back(*it);</div>
+<div class="line"><a name="l00675"></a><span class="lineno">  675</span>&#160;                        it++;</div>
+<div class="line"><a name="l00676"></a><span class="lineno">  676</span>&#160;                    }</div>
+<div class="line"><a name="l00677"></a><span class="lineno">  677</span>&#160;                }</div>
+<div class="line"><a name="l00678"></a><span class="lineno">  678</span>&#160;                <span class="keywordflow">else</span></div>
+<div class="line"><a name="l00679"></a><span class="lineno">  679</span>&#160;                {</div>
+<div class="line"><a name="l00680"></a><span class="lineno">  680</span>&#160;                    <span class="keywordflow">while</span> (*it != <span class="charliteral">&#39;:&#39;</span>)</div>
+<div class="line"><a name="l00681"></a><span class="lineno">  681</span>&#160;                    {</div>
+<div class="line"><a name="l00682"></a><span class="lineno">  682</span>&#160;                        key.push_back(*it);</div>
+<div class="line"><a name="l00683"></a><span class="lineno">  683</span>&#160;                        it++;</div>
+<div class="line"><a name="l00684"></a><span class="lineno">  684</span>&#160;                    }</div>
+<div class="line"><a name="l00685"></a><span class="lineno">  685</span>&#160;                }</div>
+<div class="line"><a name="l00686"></a><span class="lineno">  686</span>&#160; </div>
+<div class="line"><a name="l00687"></a><span class="lineno">  687</span>&#160;                <span class="comment">// read value</span></div>
+<div class="line"><a name="l00688"></a><span class="lineno">  688</span>&#160;                <span class="keywordflow">while</span> (*it != <span class="charliteral">&#39;,&#39;</span>)</div>
+<div class="line"><a name="l00689"></a><span class="lineno">  689</span>&#160;                {</div>
+<div class="line"><a name="l00690"></a><span class="lineno">  690</span>&#160;                    value.push_back(*it);</div>
+<div class="line"><a name="l00691"></a><span class="lineno">  691</span>&#160;                    it++;</div>
+<div class="line"><a name="l00692"></a><span class="lineno">  692</span>&#160;                }</div>
+<div class="line"><a name="l00693"></a><span class="lineno">  693</span>&#160; </div>
+<div class="line"><a name="l00694"></a><span class="lineno">  694</span>&#160;            }</div>
+<div class="line"><a name="l00695"></a><span class="lineno">  695</span>&#160; </div>
+<div class="line"><a name="l00696"></a><span class="lineno">  696</span>&#160; </div>
+<div class="line"><a name="l00697"></a><span class="lineno">  697</span>&#160; </div>
+<div class="line"><a name="l00698"></a><span class="lineno">  698</span>&#160;                <span class="comment">// obtain block of data</span></div>
+<div class="line"><a name="l00699"></a><span class="lineno">  699</span>&#160; </div>
+<div class="line"><a name="l00700"></a><span class="lineno">  700</span>&#160;                <span class="comment">// create temp node</span></div>
+<div class="line"><a name="l00701"></a><span class="lineno">  701</span>&#160; </div>
+<div class="line"><a name="l00702"></a><span class="lineno">  702</span>&#160;                <span class="comment">// separate key from block and store in temp node</span></div>
+<div class="line"><a name="l00703"></a><span class="lineno">  703</span>&#160; </div>
+<div class="line"><a name="l00704"></a><span class="lineno">  704</span>&#160;                <span class="comment">// separate value from block</span></div>
+<div class="line"><a name="l00705"></a><span class="lineno">  705</span>&#160; </div>
+<div class="line"><a name="l00706"></a><span class="lineno">  706</span>&#160;                <span class="comment">// call get_value and pass value from block</span></div>
+<div class="line"><a name="l00707"></a><span class="lineno">  707</span>&#160;                    </div>
+<div class="line"><a name="l00708"></a><span class="lineno">  708</span>&#160;                    <span class="comment">// </span></div>
+<div class="line"><a name="l00709"></a><span class="lineno">  709</span>&#160; </div>
+<div class="line"><a name="l00710"></a><span class="lineno">  710</span>&#160;        }</div>
+<div class="line"><a name="l00711"></a><span class="lineno">  711</span>&#160; </div>
+<div class="line"><a name="l00716"></a><span class="lineno"><a class="line" href="classcjw_1_1_j_s_o_n___list.html#a1aa1b3b819a3d1ac34c0e43a54f2b1b0">  716</a></span>&#160;        std::string <a class="code" href="classcjw_1_1_j_s_o_n___list.html#a1aa1b3b819a3d1ac34c0e43a54f2b1b0">serialize</a>()</div>
+<div class="line"><a name="l00717"></a><span class="lineno">  717</span>&#160;        {</div>
+<div class="line"><a name="l00718"></a><span class="lineno">  718</span>&#160; </div>
+<div class="line"><a name="l00719"></a><span class="lineno">  719</span>&#160;        }</div>
+<div class="line"><a name="l00720"></a><span class="lineno">  720</span>&#160;        </div>
+<div class="line"><a name="l00721"></a><span class="lineno">  721</span>&#160;    };</div>
+<div class="line"><a name="l00722"></a><span class="lineno">  722</span>&#160;}</div>
+<div class="line"><a name="l00723"></a><span class="lineno">  723</span>&#160; </div>
+<div class="line"><a name="l00724"></a><span class="lineno">  724</span>&#160;<span class="preprocessor">#endif </span><span class="comment">// !jsontr.h</span></div>
+<div class="line"><a name="l00725"></a><span class="lineno">  725</span>&#160; </div>
 <div class="ttc" id="aclasscjw_1_1_j_s_o_n___list_1_1_node_1_1_j_s_o_n___k_v_p_html"><div class="ttname"><a href="classcjw_1_1_j_s_o_n___list_1_1_node_1_1_j_s_o_n___k_v_p.html">cjw::JSON_List::Node::JSON_KVP</a></div><div class="ttdef"><b>Definition:</b> jsontr.h:51</div></div>
 <div class="ttc" id="aclasscjw_1_1_j_s_o_n___list_1_1_node_1_1_j_s_o_n___k_v_p_html_a01addb54a597e844b8ff4326c10b7152"><div class="ttname"><a href="classcjw_1_1_j_s_o_n___list_1_1_node_1_1_j_s_o_n___k_v_p.html#a01addb54a597e844b8ff4326c10b7152">cjw::JSON_List::Node::JSON_KVP::m_is_array</a></div><div class="ttdeci">bool m_is_array</div><div class="ttdef"><b>Definition:</b> jsontr.h:53</div></div>
 <div class="ttc" id="aclasscjw_1_1_j_s_o_n___list_1_1_node_1_1_j_s_o_n___k_v_p_html_a0ab765f66e09da279d10775dcc539ac1"><div class="ttname"><a href="classcjw_1_1_j_s_o_n___list_1_1_node_1_1_j_s_o_n___k_v_p.html#a0ab765f66e09da279d10775dcc539ac1">cjw::JSON_List::Node::JSON_KVP::m_value</a></div><div class="ttdeci">std::variant&lt; JSON_Value, std::vector&lt; JSON_Value &gt; &gt; m_value</div><div class="ttdef"><b>Definition:</b> jsontr.h:55</div></div>
@@ -803,15 +833,16 @@ $(document).ready(function(){initNavTree('jsontr_8h_source.html',''); initResiza
 <div class="ttc" id="aclasscjw_1_1_j_s_o_n___list_1_1_node_html_afca1cc41bb922f96c46b912527d1f8cb"><div class="ttname"><a href="classcjw_1_1_j_s_o_n___list_1_1_node.html#afca1cc41bb922f96c46b912527d1f8cb">cjw::JSON_List::Node::array_push_fpoint</a></div><div class="ttdeci">bool array_push_fpoint(const double &amp;t_input)</div><div class="ttdef"><b>Definition:</b> jsontr.h:207</div></div>
 <div class="ttc" id="aclasscjw_1_1_j_s_o_n___list_html"><div class="ttname"><a href="classcjw_1_1_j_s_o_n___list.html">cjw::JSON_List</a></div><div class="ttdef"><b>Definition:</b> jsontr.h:29</div></div>
 <div class="ttc" id="aclasscjw_1_1_j_s_o_n___list_html_a04d31cc9caebd70f30b0337b7a7a713e"><div class="ttname"><a href="classcjw_1_1_j_s_o_n___list.html#a04d31cc9caebd70f30b0337b7a7a713e">cjw::JSON_List::main_list</a></div><div class="ttdeci">std::vector&lt; Node &gt; main_list</div><div class="ttdef"><b>Definition:</b> jsontr.h:442</div></div>
-<div class="ttc" id="aclasscjw_1_1_j_s_o_n___list_html_a1aa1b3b819a3d1ac34c0e43a54f2b1b0"><div class="ttname"><a href="classcjw_1_1_j_s_o_n___list.html#a1aa1b3b819a3d1ac34c0e43a54f2b1b0">cjw::JSON_List::serialize</a></div><div class="ttdeci">std::string serialize()</div><div class="ttdoc">Serializes the contents of the curent JSON_List structure and returns an std::string.</div><div class="ttdef"><b>Definition:</b> jsontr.h:680</div></div>
+<div class="ttc" id="aclasscjw_1_1_j_s_o_n___list_html_a1aa1b3b819a3d1ac34c0e43a54f2b1b0"><div class="ttname"><a href="classcjw_1_1_j_s_o_n___list.html#a1aa1b3b819a3d1ac34c0e43a54f2b1b0">cjw::JSON_List::serialize</a></div><div class="ttdeci">std::string serialize()</div><div class="ttdoc">Serializes the contents of the curent JSON_List structure and returns an std::string.</div><div class="ttdef"><b>Definition:</b> jsontr.h:716</div></div>
 <div class="ttc" id="aclasscjw_1_1_j_s_o_n___list_html_a6bd70cd89261eb1e2cc4dd985761e904"><div class="ttname"><a href="classcjw_1_1_j_s_o_n___list.html#a6bd70cd89261eb1e2cc4dd985761e904">cjw::JSON_List::convert_to_double</a></div><div class="ttdeci">double convert_to_double(std::string t_integer_string)</div><div class="ttdef"><b>Definition:</b> jsontr.h:536</div></div>
-<div class="ttc" id="aclasscjw_1_1_j_s_o_n___list_html_a6ed9dff98fe808b0a31b5c6e9fd7b94f"><div class="ttname"><a href="classcjw_1_1_j_s_o_n___list.html#a6ed9dff98fe808b0a31b5c6e9fd7b94f">cjw::JSON_List::parse</a></div><div class="ttdeci">static JSON_List parse(std::string t_json_input)</div><div class="ttdoc">Parses c-string style input using recursion to traverse the JSON_List structure.</div><div class="ttdef"><b>Definition:</b> jsontr.h:613</div></div>
+<div class="ttc" id="aclasscjw_1_1_j_s_o_n___list_html_a6ed9dff98fe808b0a31b5c6e9fd7b94f"><div class="ttname"><a href="classcjw_1_1_j_s_o_n___list.html#a6ed9dff98fe808b0a31b5c6e9fd7b94f">cjw::JSON_List::parse</a></div><div class="ttdeci">static JSON_List parse(std::string t_json_input)</div><div class="ttdoc">Parses c-string style input using recursion to traverse the JSON_List structure.</div><div class="ttdef"><b>Definition:</b> jsontr.h:648</div></div>
+<div class="ttc" id="aclasscjw_1_1_j_s_o_n___list_html_a78d29a92ca6e041a9952c0efae57c990"><div class="ttname"><a href="classcjw_1_1_j_s_o_n___list.html#a78d29a92ca6e041a9952c0efae57c990">cjw::JSON_List::format_value</a></div><div class="ttdeci">std::string format_value(std::string t_string_input)</div><div class="ttdoc">Removes leading and trailing white spaces from input.</div><div class="ttdef"><b>Definition:</b> jsontr.h:567</div></div>
+<div class="ttc" id="aclasscjw_1_1_j_s_o_n___list_html_a82c244379e592bf5caf5a92d8ddfb04f"><div class="ttname"><a href="classcjw_1_1_j_s_o_n___list.html#a82c244379e592bf5caf5a92d8ddfb04f">cjw::JSON_List::get_value</a></div><div class="ttdeci">Node::JSON_Value get_value(std::string t_value_input)</div><div class="ttdoc">Determines the type and extracts the value of string input.</div><div class="ttdef"><b>Definition:</b> jsontr.h:603</div></div>
 <div class="ttc" id="aclasscjw_1_1_j_s_o_n___list_html_a95788ce1db0a0e14335bc9b3cb709f61"><div class="ttname"><a href="classcjw_1_1_j_s_o_n___list.html#a95788ce1db0a0e14335bc9b3cb709f61">cjw::JSON_List::read_object</a></div><div class="ttdeci">Node read_object(const std::string &amp;t_object_key, const std::string &amp;t_input, std::string::iterator &amp;t_iterator)</div><div class="ttdef"><b>Definition:</b> jsontr.h:552</div></div>
 <div class="ttc" id="aclasscjw_1_1_j_s_o_n___list_html_a99c097cff47bcbe7a5887ea6f318c2a7"><div class="ttname"><a href="classcjw_1_1_j_s_o_n___list.html#a99c097cff47bcbe7a5887ea6f318c2a7">cjw::JSON_List::convert_to_int</a></div><div class="ttdeci">int convert_to_int(std::string t_integer_string)</div><div class="ttdef"><b>Definition:</b> jsontr.h:544</div></div>
 <div class="ttc" id="aclasscjw_1_1_j_s_o_n___list_html_aa724a1c9b7dba80a3c678b11ec3246f0"><div class="ttname"><a href="classcjw_1_1_j_s_o_n___list.html#aa724a1c9b7dba80a3c678b11ec3246f0">cjw::JSON_List::check_type</a></div><div class="ttdeci">int check_type(std::string t_string_input)</div><div class="ttdef"><b>Definition:</b> jsontr.h:484</div></div>
 <div class="ttc" id="aclasscjw_1_1_j_s_o_n___list_html_ac0de9f8f367a6d43c39f2967f3f1a4ae"><div class="ttname"><a href="classcjw_1_1_j_s_o_n___list.html#ac0de9f8f367a6d43c39f2967f3f1a4ae">cjw::JSON_List::read_array</a></div><div class="ttdeci">Node::JSON_KVP read_array(const std::string &amp;t_input, std::string::iterator &amp;t_iterator)</div><div class="ttdef"><b>Definition:</b> jsontr.h:557</div></div>
 <div class="ttc" id="aclasscjw_1_1_j_s_o_n___list_html_af04b7fe2c35f34c71d962744a0f10cd7"><div class="ttname"><a href="classcjw_1_1_j_s_o_n___list.html#af04b7fe2c35f34c71d962744a0f10cd7">cjw::JSON_List::is_number</a></div><div class="ttdeci">int is_number(std::string t_string_input)</div><div class="ttdef"><b>Definition:</b> jsontr.h:446</div></div>
-<div class="ttc" id="aclasscjw_1_1_j_s_o_n___list_html_af7df17435a54ed4dcc9dec643835ff2e"><div class="ttname"><a href="classcjw_1_1_j_s_o_n___list.html#af7df17435a54ed4dcc9dec643835ff2e">cjw::JSON_List::get_value</a></div><div class="ttdeci">Node get_value()</div><div class="ttdoc">obtains the value from a string input</div><div class="ttdef"><b>Definition:</b> jsontr.h:568</div></div>
 <div class="ttc" id="anamespacecjw_html"><div class="ttname"><a href="namespacecjw.html">cjw</a></div><div class="ttdef"><b>Definition:</b> jsontr.h:26</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->

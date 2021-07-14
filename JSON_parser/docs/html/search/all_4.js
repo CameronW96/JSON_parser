@@ -1,9 +1,11 @@
 var searchData=
 [
-  ['json_5fkvp_32',['JSON_KVP',['../classcjw_1_1_j_s_o_n___list_1_1_node_1_1_j_s_o_n___k_v_p.html',1,'cjw::JSON_List::Node::JSON_KVP'],['../classcjw_1_1_j_s_o_n___list_1_1_node_1_1_j_s_o_n___k_v_p.html#a3d2f5134a87d5a2eaf3f43e30cf1bd1e',1,'cjw::JSON_List::Node::JSON_KVP::JSON_KVP()']]],
-  ['json_5flist_33',['JSON_List',['../classcjw_1_1_j_s_o_n___list.html',1,'cjw::JSON_List'],['../classcjw_1_1_j_s_o_n___list_1_1_node.html#ae425976f9014b738bc8798b90091fa7b',1,'cjw::JSON_List::Node::JSON_List()']]],
-  ['json_5fvalue_34',['JSON_Value',['../classcjw_1_1_j_s_o_n___list_1_1_node_1_1_j_s_o_n___value.html',1,'cjw::JSON_List::Node::JSON_Value'],['../classcjw_1_1_j_s_o_n___list_1_1_node_1_1_j_s_o_n___value.html#a7f10da27ec891ea444158acbffaf2c08',1,'cjw::JSON_List::Node::JSON_Value::JSON_Value()'],['../classcjw_1_1_j_s_o_n___list_1_1_node_1_1_j_s_o_n___value.html#abc1b5bc5b1bcc68bec27d1dee1965cd1',1,'cjw::JSON_List::Node::JSON_Value::JSON_Value(const JSON_Value &amp;t_copy)']]],
-  ['jsonator_35',['JSONator',['../index.html',1,'']]],
-  ['jsontr_36',['jsontr',['../jsontr_8h.html#aa1d7d3d49e2e5834733f1e34a64d8baf',1,'jsontr.h']]],
-  ['jsontr_2eh_37',['jsontr.h',['../jsontr_8h.html',1,'']]]
+  ['init_25',['init',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#a6716cf68b66c2386bd30600e8460ec6b',1,'cjw::JSON_List::Node']]],
+  ['init_5farray_26',['init_array',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#ad20ac94cb8c608f9e3f7a85029268912',1,'cjw::JSON_List::Node']]],
+  ['init_5fbool_27',['init_bool',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#acd10742fc389fe537ab9cc68575e08d0',1,'cjw::JSON_List::Node']]],
+  ['init_5fdouble_28',['init_double',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#a2869e5294992658a4b70e78192d5c18e',1,'cjw::JSON_List::Node']]],
+  ['init_5fint_29',['init_int',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#a287dfad203f2b212174a5665e3c87747',1,'cjw::JSON_List::Node']]],
+  ['init_5fobject_30',['init_object',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#aa8a3a0364ca370e59ebc5934c2189eec',1,'cjw::JSON_List::Node::init_object(const std::string &amp;t_key, const Node *&amp;t_value)'],['../classcjw_1_1_j_s_o_n___list_1_1_node.html#ada3af2f93c7ed823bf4448518dfa51ba',1,'cjw::JSON_List::Node::init_object(const std::string &amp;t_key)']]],
+  ['init_5fstring_31',['init_string',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#a00dc1af1a423990c5a6eda1a44428790',1,'cjw::JSON_List::Node']]],
+  ['is_5fnumber_32',['is_number',['../classcjw_1_1_j_s_o_n___list.html#af04b7fe2c35f34c71d962744a0f10cd7',1,'cjw::JSON_List']]]
 ];

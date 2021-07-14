@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['var_5ft_54',['var_t',['../classcjw_1_1_j_s_o_n___list_1_1_node.html#aaf6083368c8741fa8b0b6b6b8284a5c6',1,'cjw::JSON_List::Node']]]
+  ['serialize_54',['serialize',['../classcjw_1_1_j_s_o_n___list.html#a1aa1b3b819a3d1ac34c0e43a54f2b1b0',1,'cjw::JSON_List']]]
 ];
