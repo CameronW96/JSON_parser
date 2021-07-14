@@ -4,6 +4,10 @@ It's come to this...
 
 ==================================================================================================================================================================
 Status Update - 7/07/2021 5:01 PM
+	Not working on the operator overloads yet. Currently working on the parser which seems to be the best way to actually test the class. This is also probably the last piece of difficult logic
+	as the serializer will be trivial by comparison. The parser needs a way to init a node based on the return type of check_type. Shouldn't be too difficult.
+
+Status Update - 7/07/2021 5:01 PM
 	Ok so the Node structure is mostly complete. Need to create an interface in the JSONlist class to be able to test it. Operator overloads ahoy!
 
 Status Update - 6/30/2021 7:46 PM

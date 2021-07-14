@@ -1,4 +1,15 @@
+/**
+* \mainpage JSONator
+* 
+* Author: Cameron White
+* 
+* This library provides a basic JSON data structure.
+* 
+* This is intended for use with raw text input such as the type received from web API requests or json files.
+*/
+
 #pragma once
+
 #ifndef jsontr
 #define jsontr
 
@@ -11,24 +22,21 @@
 #include <sstream>
 #include <algorithm>
 
-namespace JSONator
+namespace cjw
 {
+
 	class JSON_List
 	{
 	private:
 		class Node
 		{
 			friend class JSON_List;
-		private:
 			using var_t = std::variant<int, bool, double, std::string, Node*>;
 
+		private:
 			class JSON_Value
 			{
 			public:
-
-				// m_type represents the type held in m_value
-				// 0 = VOID/NULL, 1 = int, 2 = bool, 3 = double, 4 = string, 5 = object
-				// int m_type = 0; !not needed
 				var_t m_value_individual = 0;
 			public:
 
@@ -42,9 +50,6 @@ namespace JSONator
 			class JSON_KVP
 			{
 			public:
-
-				// m_type represents the type held in m_value
-				// 0 = VOID/NULL, 1 = KVP, 2 = array
 				bool m_is_array = false;
 				std::string m_key;
 				std::variant<JSON_Value, std::vector<JSON_Value>> m_value;
@@ -102,7 +107,7 @@ namespace JSONator
 
 				init(t_key, init_value);
 			}
-			void init_fpoint (const std::string &t_key, const double &t_value)
+			void init_double (const std::string &t_key, const double &t_value)
 			{
 				JSON_Value init_value;
 				init_value.m_value_individual = t_value;
@@ -438,18 +443,42 @@ namespace JSONator
 	private:
 		// return integer indicating the type held in the string argument
 		// 0 = NAN, 1 = INTEGER, 2 = DOUBLE
-		int is_number(const std::string &t_string_input)
+		int is_number(std::string t_string_input)
 		{
+			// remove whitespace from string
+			t_string_input.erase(std::remove_if(t_string_input.begin(), t_string_input.end(), ::isspace), t_string_input.end());
+
+			int decimal_counter = 0;
 			for (int i = 0; i < t_string_input.size(); i++)
 			{
-				if (!std::isdigit(static_cast<unsigned char>(t_string_input[i])))
+				if (std::isdigit(static_cast<unsigned char>(t_string_input[i])))
 				{
-					return false;
+					continue;
 				}
+				else if (t_string_input[i] == '.')
+				{
+					decimal_counter++;
+					continue;
+				}
+				else
+				{
+					return 0;
+				}
+			}
+			if (decimal_counter == 0)
+			{
+				return 1;
+			}
+			else if (decimal_counter == 1)
+			{
+				return 2;
+			}
+			else
+			{
+				return 0;
 			}
 		}
 
-	public:
 		// return integer indicating the type held in the string argument
 		// 0 = NULL/SYNTAX ERROR, 1 = INTEGER, 2 = DOUBLE, 3 = BOOL, 4 = STRING, 5 = NODE
 		int check_type(std::string t_string_input)
@@ -473,57 +502,56 @@ namespace JSONator
 				std::string temp_buf;
 				for (int i = 0; i < 5; i++)
 				{
-					temp_buf.push_back(*it);
-					it++;
+					if (it == t_string_input.end())
+					{
+						break;
+					}
+					else
+					{
+						temp_buf.push_back(*it);
+						it++;
+					}
 				}
+				if (temp_buf == "false")
+				{
+					return 3;
+				}
+				else
+				{
+					temp_buf.pop_back();
+					if (temp_buf == "true")
+					{
+						return 3;
+					}
+				}
+			}
+			else
+			{
+				return is_number(t_string_input);
 			}
 
 
 		}
 
-		Node* read_object(const std::string &t_input, std::string::iterator &t_iterator)
+		double convert_to_double(std::string t_integer_string)
 		{
-			Node temp_node;
-			std::string key;
-			std::string value;
-			bool reading_string = false;
+			// remove whitespace
+			t_integer_string.erase(std::remove_if(t_integer_string.begin(), t_integer_string.end(), ::isspace), t_integer_string.end());
 
-			while (*t_iterator != '}')
-			{
-				if (*t_iterator == ' ' && reading_string == false)
-				{
-					t_iterator++;
-				}
+			return std::stod(t_integer_string);
+		}
 
-				// read key
-				if (*t_iterator == '"')
-				{
-					reading_string = true;
-					t_iterator++;
-					while (*t_iterator != ':')
-					{
-						key.push_back(*t_iterator);
-						t_iterator++;
-					}
-				}
-				else 
-				{
-					reading_string = false;
-					while (*t_iterator != ':')
-					{
-						key.push_back(*t_iterator);
-						t_iterator++;
-					}
-				}
+		int convert_to_int(std::string t_integer_string)
+		{
+			// remove whitespace
+			t_integer_string.erase(std::remove_if(t_integer_string.begin(), t_integer_string.end(), ::isspace), t_integer_string.end());
 
-				// read value
-				    // get value string
-				while (*t_iterator != ',')
-				{
-					value.push_back(*t_iterator);
-				}
-					// determine type
-			}
+			return std::stoi(t_integer_string);
+		}
+
+		Node read_object(const std::string &t_object_key, const std::string& t_input, std::string::iterator& t_iterator)
+		{
+			
 		}
 
 		Node::JSON_KVP read_array(const std::string& t_input, std::string::iterator& t_iterator)
@@ -531,47 +559,129 @@ namespace JSONator
 
 		}
 
+		/// <summary>
+		/// obtains the value from a string input 
+ 		/// </summary>
+		/// <param name="t_input"></param>
+		/// <param name="t_iterator"></param>
+		/// <returns></returns>
+		Node get_value()
+		{
+			// take in value to check
 
+			// determine value
+			int type = check_type(value);
 
-		
+			switch (type)
+			{
+			case 0: // invalid input
+			{
+				Node empty_object;
+				empty_object.init_object(t_object_key);
+				return empty_object; // return empty object
+				break;
+			}
+			case 1: // integer
+			{
+				Node temp_integer_node;
+				temp_integer_node.init_int(key, convert_to_int(value));
+				node_return_object.object_push(temp_integer_node); // node or KVP??
+				break;
+			}
+			case 2: // double
+			{
+				Node temp_double_node;
+				temp_double_node.init_double(key, convert_to_double(value));
+				break;
+			}
+			}
+			// call appropriate read function
 
+				// read function recursively calls get_value() if it encounters an array or object
+				
+		}
+
+	public:
+		/**
+		* Parses c-string style input using recursion to traverse the JSON_List structure.
+		* @param t_json_input JSON formatted text input.
+		* @returns A JSON_List object that can be used to initialize another JSON_List object.
+		* @warning If your JSON object is held in a char[] buffer
+		* it must first be converted to std::string.
+		* @see get_value(), read_array(), read_object()
+		*/
 		static JSON_List parse(std::string t_json_input)
 		{
 			JSON_List temp_list;
 			std::string::iterator it = t_json_input.begin();
 			
+			while (*it == ' ') { it++; } // skip leading white space
 			if (*it != '{') { return temp_list; } // return an empty object if not reading a JSON object
 
-			while (it != t_json_input.end())
-			{
-				
+			std::string key;
+			std::string value;
 
+			while (*it != '}')
+			{
+				if (*it == ' ')
+				{
+					it++;
+				}
+
+				// read key
+				if (*it == '"')
+				{
+					it++;
+					while (*it != '"')
+					{
+						key.push_back(*it);
+						it++;
+					}
+				}
+				else
+				{
+					while (*it != ':')
+					{
+						key.push_back(*it);
+						it++;
+					}
+				}
+
+				// read value
+					// get value string
+				while (*it != ',')
+				{
+					value.push_back(*it);
+					it++;
+				}
 
 			}
 
+			// loop through first level of structure
+
+				// obtain block of data
+
+				// create temp node
+
+				// separate key from block and store in temp node
+
+				// separate value from block
+
+				// call get_value and pass value from block
+					
+					// 
+
 		}
 
+		/**
+		* Serializes the contents of the curent JSON_List structure and returns an std::string.
+		* @warning May need to be converted to char[] depending on your use case.
+		*/
 		std::string serialize()
 		{
 
 		}
 		
-		void operator[](int t_input)
-		{
-
-		}
-		void operator[](bool t_input)
-		{
-
-		}
-		void operator[](double t_input)
-		{
-
-		}
-		void operator[](std::string t_input)
-		{
-
-		}
 	};
 }
 
