@@ -439,7 +439,7 @@ namespace cjw
 		};
 
 	private:
-		std::vector<Node> main_list;
+		Node main_list;
 	private:
 		// return integer indicating the type held in the string argument
 		// 0 = NAN, 1 = INTEGER, 2 = DOUBLE
@@ -483,7 +483,7 @@ namespace cjw
 		* Determines type from string input.
 		* @param t_string_input Input string to be evaluated.
 		* @returns Integer indindicating the type held in the string argument:
-		* 0 = NULL/SYNTAX ERROR, 1 = INTEGER, 2 = DOUBLE, 3 = BOOL, 4 = STRING, 5 = NODE
+		* 0 = NULL/SYNTAX ERROR, 1 = INTEGER, 2 = DOUBLE, 3 = BOOL, 4 = STRING, 5 = NODE, 6 = ARRAY
 		*/
 		static int check_type(std::string t_string_input)
 		{
@@ -491,6 +491,10 @@ namespace cjw
 			if (*it == '"') // check for string
 			{
 				return 4;
+			}
+			else if (*it == '[')
+			{
+				return 6;
 			}
 			else if (*it == '{') // check for object
 			{
@@ -546,9 +550,66 @@ namespace cjw
 			return std::stoi(t_integer_string);
 		}
 
-		static Node read_object(const std::string &t_object_key, const std::string& t_input, std::string::iterator& t_iterator)
+		static Node read_object(std::string t_object_input)
 		{
-			
+			std::string::iterator it = t_object_input.begin();
+			Node temp_node;
+			temp_node.init_object("");
+			std::string key;
+			std::string value;
+
+			// skip any leading white space
+			while (*it == ' ') { it++; }
+			// return an empty object if not reading a JSON object
+			if (*it != '{') { return temp_node; }
+
+			// loop through key value pairs
+			while (*it != '}')
+			{
+				// skip white space in-between blocks
+				if (*it == ' ')
+				{
+					it++;
+					continue;
+				}
+
+				// read key
+				if (*it == '"')
+				{
+					it++;
+					while (*it != '"')
+					{
+						key.push_back(*it);
+						it++;
+					}
+				}
+				else
+				{
+					while (*it != ':')
+					{
+						key.push_back(*it);
+						it++;
+					}
+				}
+
+				// read value
+				while (*it != ',' & *it != '}')
+				{
+					value.push_back(*it);
+					it++;
+				}
+
+				temp_node = get_value(key, value);
+				if (*it == '}')
+				{
+					break;
+				}
+				else
+				{
+					it++;
+				}
+			}
+			return temp_node;
 		}
 
 		static Node::JSON_KVP read_array(const std::string& t_input, std::string::iterator& t_iterator)
@@ -599,45 +660,76 @@ namespace cjw
 		* Determines the type and extracts the value of string input.
 		* This function also calls read_array() and read_object() which contain recursive calls to get_value().
 		* This enables us to fully traverse the potential recursive tree structure contained in a Node.
+		* @param t_key Key used to initialize Node object.
 		* @param t_string_input C-string input to extract the value from.
 		* @returns A JSON_Value object.
 		*/
-		static Node::JSON_Value get_value(std::string t_value_input)
+		static Node get_value(std::string t_key, std::string t_value_input)
 		{
+			Node temp_node_object;
 			// format input
 			std::string value = format_value(t_value_input);
-			// take in value to check
-
-			// determine value
+			// get type of input
 			int type = check_type(value);
 
 			switch (type)
 			{
 			case 0: // invalid input
 			{
-				Node empty_object;
-				empty_object.init_object(t_object_key);
-				return empty_object; // return empty object
+				return temp_node_object;
 				break;
 			}
 			case 1: // integer
 			{
-				Node temp_integer_node;
-				temp_integer_node.init_int(key, convert_to_int(value));
-				node_return_object.object_push(temp_integer_node); // node or KVP??
+				temp_node_object.init_int(t_key, convert_to_int(value));
+				return temp_node_object;
 				break;
 			}
 			case 2: // double
 			{
-				Node temp_double_node;
-				temp_double_node.init_double(key, convert_to_double(value));
+				temp_node_object.init_double(t_key, convert_to_double(value));
+				return temp_node_object;
 				break;
 			}
+			case 3: // bool
+			{
+				bool temp_bool;
+				if (value == "true")
+				{
+					temp_bool = true;
+				}
+				else
+				{
+					temp_bool = false;
+				}
+				temp_node_object.init_bool(t_key, temp_bool);
+				return temp_node_object;
+				break;
 			}
-			// call appropriate read function
-
-				// read function recursively calls get_value() if it encounters an array or object
-				
+			case 4: // string
+			{
+				temp_node_object.init_string(t_key, value);
+				return temp_node_object;
+				break;
+			}
+			case 5: // node
+			{
+				temp_node_object.init_object(t_key);
+				// create JSON_Value
+				Node::JSON_Value temp_value;
+				temp_value.m_value_individual = 
+				// create JSON_KVP
+				// must call read_object
+				temp_node_object.object_push(read_object(value));
+				return temp_node_object;
+				break;
+			}
+			case 6: // array
+			{
+				// must call read_array
+				break;
+			}
+			}	
 		}
 
 	public:
@@ -652,65 +744,8 @@ namespace cjw
 		static JSON_List parse(std::string t_json_input)
 		{
 			JSON_List temp_list;
-			std::string::iterator it = t_json_input.begin();
-			std::string key;
-			std::string value;
-			
-			while (*it == ' ') { it++; } // skip any leading white space
-			if (*it != '{') { return temp_list; } // return an empty object if not reading a JSON object
-
-			// loop through first level of structure
-			while (*it != '}')
-			{
-				// skip white space in-between blocks
-				if (*it == ' ')
-				{
-					it++;
-					continue;
-				}
-
-				// read key
-				if (*it == '"')
-				{
-					it++;
-					while (*it != '"')
-					{
-						key.push_back(*it);
-						it++;
-					}
-				}
-				else
-				{
-					while (*it != ':')
-					{
-						key.push_back(*it);
-						it++;
-					}
-				}
-
-				// read value
-				while (*it != ',')
-				{
-					value.push_back(*it);
-					it++;
-				}
-
-			}
-
-
-
-				// obtain block of data
-
-				// create temp node
-
-				// separate key from block and store in temp node
-
-				// separate value from block
-
-				// call get_value and pass value from block
-					
-					// 
-
+			temp_list.main_list = read_object(t_json_input);
+			return temp_list;			
 		}
 
 		/**
