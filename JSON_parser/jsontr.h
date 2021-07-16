@@ -31,20 +31,13 @@ namespace cjw
 		class Node
 		{
 			friend class JSON_List;
-			using var_t = std::variant<int, bool, double, std::string, Node*>;
+			using var_t = std::variant<int, bool, double, std::string, std::shared_ptr<Node>>;
 
 		private:
 			class JSON_Value
 			{
 			public:
 				var_t m_value_individual = 0;
-			public:
-
-				JSON_Value() {};
-				JSON_Value(const JSON_Value& t_copy)
-				{
-					m_value_individual = t_copy.m_value_individual;
-				};
 			};
 
 			class JSON_KVP
@@ -55,31 +48,20 @@ namespace cjw
 				std::variant<JSON_Value, std::vector<JSON_Value>> m_value;
 
 			public:
-				JSON_KVP() {};
-				//JSON_KVP(JSON_KVP& t_copy) {};
-
-				/*JSON_KVP& operator=(const JSON_KVP& t_copy)
+				static JSON_KVP make_kvp(std::string t_key, JSON_Value t_value)
 				{
-					m_is_array = t_copy.m_is_array;
-					m_key = t_copy.m_key;
-					if (std::holds_alternative<JSON_Value>(t_copy.m_value))
-					{
-						JSON_Value temp = std::get<JSON_Value>(t_copy.m_value);
-						m_value = temp;
-					}
-					else
-					{
-						std::vector<JSON_Value> temp = std::get<std::vector<JSON_Value>>(t_copy.m_value);
-						m_value = temp;
-					}
-				}*/
+					JSON_KVP temp_kvp;
+					temp_kvp.m_key = t_key;
+					temp_kvp.m_value = t_value;
+					return temp_kvp;
+				}
 			};
 
 		private:
 			// specifies whether this node is a JSON object
 			// m_value should be initialized to a vector in this case
 			bool m_is_object = false;
-			std::string object_key;
+			std::string m_object_key;
 			std::variant<JSON_KVP, std::vector<JSON_KVP>> m_kvp;
 
 		public:
@@ -140,11 +122,11 @@ namespace cjw
 				std::vector<JSON_Value> init_vector;
 				temp_ptr->m_value = init_vector;
 			}
-			// declares that this node contains an object and initializes the node with an empty object
+			// declares that this node contains an object and initializes the node with an empty object  TODO: Update this documentation
 			// object must be populated with object_push
-			void init_object (const std::string &t_key)
+			void init_object (const std::string &t_key, std::vector<JSON_KVP> t_value_object)
 			{
-				JSON_Value temp_value;
+				/*JSON_Value temp_value;
 
 				JSON_KVP temp_kvp;
 				temp_kvp.m_value = temp_value;
@@ -160,7 +142,11 @@ namespace cjw
 				init_kvp.m_key = t_key;
 				init_kvp.m_value = init_value;
 
-				m_kvp = init_kvp;
+				m_kvp = init_kvp;*/
+
+				m_is_object = true;
+				m_object_key = t_key;
+				m_kvp = t_value_object;
 			}
 
 			// **** ARRAY MANIPULATION ****
@@ -272,7 +258,7 @@ namespace cjw
 			{
 				if (m_is_object == true)
 				{ 
-					return object_key;
+					return m_object_key;
 				}
 				else
 				{
@@ -550,18 +536,28 @@ namespace cjw
 			return std::stoi(t_integer_string);
 		}
 
-		static Node read_object(std::string t_object_input)
+		/**
+		* Parses a JSON object from a std::string.
+		* This function heap allocates a new node and returns a shared_ptr as a Node object is
+		* self referential and can only hold a pointer to itself. Due to the dynamic nature of the
+		* JSON structure, smart pointers are preferable over RAII in this instance. This function also 
+		* calls get_value() which will result in a recursive loop if the value is another object.
+		* The loop is resolved when it reaches that last node in the tree structure.
+		* @param t_object_input The object value to be parsed.
+		* @returns A shared pointer to a heap allocated Node object.
+		* @see get_value()
+		*/
+		static std::vector<Node::JSON_KVP> read_object(std::string t_object_input)
 		{
 			std::string::iterator it = t_object_input.begin();
-			Node temp_node;
-			temp_node.init_object("");
+			std::vector<Node::JSON_KVP> temp_kvp_array;
 			std::string key;
 			std::string value;
 
 			// skip any leading white space
 			while (*it == ' ') { it++; }
-			// return an empty object if not reading a JSON object
-			if (*it != '{') { return temp_node; }
+			// return an empty kvp array if not reading a JSON object
+			if (*it != '{') { return temp_kvp_array; }
 
 			// loop through key value pairs
 			while (*it != '}')
@@ -572,7 +568,6 @@ namespace cjw
 					it++;
 					continue;
 				}
-
 				// read key
 				if (*it == '"')
 				{
@@ -591,7 +586,6 @@ namespace cjw
 						it++;
 					}
 				}
-
 				// read value
 				while (*it != ',' & *it != '}')
 				{
@@ -599,7 +593,8 @@ namespace cjw
 					it++;
 				}
 
-				temp_node = get_value(key, value);
+				temp_kvp_array.push_back(Node::JSON_KVP::make_kvp(key, get_value(value)));
+
 				if (*it == '}')
 				{
 					break;
@@ -609,7 +604,7 @@ namespace cjw
 					it++;
 				}
 			}
-			return temp_node;
+			return temp_kvp_array;
 		}
 
 		static Node::JSON_KVP read_array(const std::string& t_input, std::string::iterator& t_iterator)
@@ -657,16 +652,36 @@ namespace cjw
 		}
 
 		/**
+		* Removes quotation marks from the first and last position in a string.
+		* @param t_string_input String to be edited.
+		* @attention Assumes no leading or trailing whitespace. Format with format_value()
+		* first if needed.
+		* @see format_value()
+		*/
+		static std::string remove_quotes(std::string t_string_input)
+		{
+			if (t_string_input[0] == '"')
+			{
+				t_string_input.erase(0, 1);
+			}
+
+			if (t_string_input[t_string_input.size()] == '"')
+			{
+				t_string_input.erase(t_string_input.size(), 1);
+			}
+			return t_string_input;
+		}
+
+		/**
 		* Determines the type and extracts the value of string input.
 		* This function also calls read_array() and read_object() which contain recursive calls to get_value().
 		* This enables us to fully traverse the potential recursive tree structure contained in a Node.
-		* @param t_key Key used to initialize Node object.
-		* @param t_string_input C-string input to extract the value from.
+		* @param t_string_input std::string input to extract the value from.
 		* @returns A JSON_Value object.
 		*/
-		static Node get_value(std::string t_key, std::string t_value_input)
+		static Node::JSON_Value get_value(std::string t_value_input)
 		{
-			Node temp_node_object;
+			Node::JSON_Value temp_value;
 			// format input
 			std::string value = format_value(t_value_input);
 			// get type of input
@@ -676,19 +691,19 @@ namespace cjw
 			{
 			case 0: // invalid input
 			{
-				return temp_node_object;
+				return temp_value;
 				break;
 			}
 			case 1: // integer
 			{
-				temp_node_object.init_int(t_key, convert_to_int(value));
-				return temp_node_object;
+				temp_value.m_value_individual = convert_to_int(value);
+				return temp_value;
 				break;
 			}
 			case 2: // double
 			{
-				temp_node_object.init_double(t_key, convert_to_double(value));
-				return temp_node_object;
+				temp_value.m_value_individual = convert_to_double(value);
+				return temp_value;
 				break;
 			}
 			case 3: // bool
@@ -702,26 +717,22 @@ namespace cjw
 				{
 					temp_bool = false;
 				}
-				temp_node_object.init_bool(t_key, temp_bool);
-				return temp_node_object;
+				temp_value.m_value_individual = temp_bool;
+				return temp_value;
 				break;
 			}
 			case 4: // string
 			{
-				temp_node_object.init_string(t_key, value);
-				return temp_node_object;
+				temp_value.m_value_individual = value;
+				return temp_value;
 				break;
 			}
 			case 5: // node
 			{
-				temp_node_object.init_object(t_key);
-				// create JSON_Value
-				Node::JSON_Value temp_value;
-				temp_value.m_value_individual = 
-				// create JSON_KVP
-				// must call read_object
-				temp_node_object.object_push(read_object(value));
-				return temp_node_object;
+				std::shared_ptr<Node> temp_node_object(new Node);
+				temp_node_object->init_object("", read_object(value));
+				temp_value.m_value_individual = temp_node_object;
+				return temp_value;
 				break;
 			}
 			case 6: // array
@@ -744,7 +755,7 @@ namespace cjw
 		static JSON_List parse(std::string t_json_input)
 		{
 			JSON_List temp_list;
-			temp_list.main_list = read_object(t_json_input);
+			temp_list.main_list.init_object("", read_object(t_json_input));
 			return temp_list;			
 		}
 
