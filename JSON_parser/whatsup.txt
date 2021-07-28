@@ -1,0 +1,79 @@
+So...
+
+It's come to this...
+
+==================================================================================================================================================================
+Status Update - 7/22/2021 1:49 PM
+	More problems... nested objects need to be able to know they're reading a nested object or it falsley reads the end brace as the end of the outer object. Similar to the array problem.
+
+Status Update - 7/16/2021 11:26 AM
+	Finished the read object loop which is good. Working on reading an array which is the last part of the parser. Need to figure out how to represent an array in a way that makes sense with
+	the return type for get_value.
+
+Status Update - 7/14/2021 1:52 PM
+	Made a lot of good progress today on the parser and related helper functions. Had to stop because the recursion was melting my mind. Need the read object function to be the entry point into a
+	recursive loop that will read through all possible branches in a node and return a base node that contains everything. I changed the JSON_List type from a vector of nodes to a single node which
+	was probably a mistake in hindsight. Need to think about this more.
+
+Status Update - 7/07/2021 5:01 PM
+	Not working on the operator overloads yet. Currently working on the parser which seems to be the best way to actually test the class. This is also probably the last piece of difficult logic
+	as the serializer will be trivial by comparison. The parser needs a way to init a node based on the return type of check_type. Shouldn't be too difficult.
+
+Status Update - 7/07/2021 5:01 PM
+	Ok so the Node structure is mostly complete. Need to create an interface in the JSONlist class to be able to test it. Operator overloads ahoy!
+
+Status Update - 6/30/2021 7:46 PM
+	I'm starting to understand std::visit but it doesn't look like the solution to the problem. 
+
+Status Update - 6/25/2021 2:38 PM
+	Working on accessing methods from a pointer which has made some weird bugs. Now trying to get the copy constructors to work in the JSON_Value and JSON_KVP classes.
+
+Status Update - 6/24/2021 9:20 PM
+	Still working on the array_push methods. Need to figure out how to access vector methods from a pointer.
+
+Status Update - 6/21/2021 7:05 PM
+	Need to figure out the array_push methods. May have to eliminate the variant in JSON_KVP and Node classes and declare both as a vector.
+
+Status Update - 6/18/2021 9:13 PM
+	Made a whole bunch of progress laying out the structure for the Node class. Was able to contain a node reference inside of the JSON_Value struct which solves the object recursion issue. We will just have to construct the node outside the Node class and pass it in after construction.
+	Need to start with the function implementations and then we can move on to the structure for the JSON_List class.
+
+Status Update - 6/16/2021 11:39 AM
+	What a day. I spent a good hour trying to diagnose a problem with the variant include not working and ended up trashing my code an starting over. It's ok since this whole thing needs to be reworked anyway. Still trying to figure out how to represent objects and arrays inside the class.
+	In order to have multiple types inside each I'm thinking we may have to go back to representing everything as a string. Could we change the KVP class to hold an array or an object struct? This could lead to some weird recursion...
+
+Status Update - 6/14/2021 9:34 PM
+	Looks like I've skipped some updates. Currently trying to figure out the object structure for the JSON class. I'm thinking that the Node struct needs to change to Variant, and then we'll have a KVP, array, and object struct to represent the different data structures.
+	Each of those three structs will use the Variant struct to represent their KVPs. See the object_construction.txt file for more info.
+
+Status Update - 6/08/2021 9:59 PM
+	Created a variant class to use instead of template specialization. Going to have to do some thinking on how to refactor the code to use it.
+
+Status Update - 6/04/2021 8:44 PM
+	Realized that the logic I had in my head for the reconstruct function is flawed. We can't use templates because they require the type to be known at compile time. The alternative seemed to be boost::variant which is a massive dependency and will be make the library more "clunky" 
+	to distribute. Looking into unions to see if I can create a basic version of variant that's easier to include.
+
+Status Update - 6/03/2021 7:23 PM
+	Finished refactoring to use std::list. Need to figure out the reconstruction logic in order to retrieve the key/value in its original type from the list. Before we start on that though it may be a good idea to get a handle on writing test cases and test the current code.
+	For the reconstruction logic we may be able to use a function to determine the original type and then call the corresponding reconstruct_value function. Or... the reconstruct_value function calls the reconstruct function which determins the type and then returns from the
+	reconstruct_value function... need to think on this.
+
+Status Update - 5/26/2021 8:32 AM
+	Still working on refactoring for std::list.
+
+Status Update - 5/25/2021 7:54 PM
+	I think we need to refactor to use std::list rather than a custom data structure. This will give us all the standard functions and then we can add our own to the library.
+
+Status Update - 5/19/2021 12:35 PM:
+	Finally made some progress today. The iterator class should be done for the most part and I started outlining the functions needed in the JSON_list class. The reconstruct function should be interesting since the return type could be one of several. Need to make sure the public/private
+	sections are straight in order to reclass the structs to classes. 
+
+Status Update - 5/12/2021 2:12 PM:
+	Working on determining the type of an argument in order to populate the node constructor when creating a new node.
+
+Status Update - 5/12/2021 12:14 PM:
+	Having a typeless list isn't going to work because of the need to know types at compile time. Instead everything will be stored as a string and the type will also be stored in the node. We can then use this information to return the correct type with a member function.
+
+Status Update - 5/5/2021 11:29 AM:
+	Trying to figure out how to have a linked list with a unique type for each node. Since the type can be anything in JSON each key and value in each node needs to be able to be any type. STD::list requires the type to be defined when it is instantiated so we will have to impletement our own
+	version.
