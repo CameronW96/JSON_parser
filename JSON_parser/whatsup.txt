@@ -3,6 +3,22 @@ So...
 It's come to this...
 
 ==================================================================================================================================================================
+Status Update - 7/22/2021 1:49 PM
+	More problems... nested objects need to be able to know they're reading a nested object or it falsley reads the end brace as the end of the outer object. Similar to the array problem.
+
+Status Update - 7/16/2021 11:26 AM
+	Finished the read object loop which is good. Working on reading an array which is the last part of the parser. Need to figure out how to represent an array in a way that makes sense with
+	the return type for get_value.
+
+Status Update - 7/14/2021 1:52 PM
+	Made a lot of good progress today on the parser and related helper functions. Had to stop because the recursion was melting my mind. Need the read object function to be the entry point into a
+	recursive loop that will read through all possible branches in a node and return a base node that contains everything. I changed the JSON_List type from a vector of nodes to a single node which
+	was probably a mistake in hindsight. Need to think about this more.
+
+Status Update - 7/07/2021 5:01 PM
+	Not working on the operator overloads yet. Currently working on the parser which seems to be the best way to actually test the class. This is also probably the last piece of difficult logic
+	as the serializer will be trivial by comparison. The parser needs a way to init a node based on the return type of check_type. Shouldn't be too difficult.
+
 Status Update - 7/07/2021 5:01 PM
 	Ok so the Node structure is mostly complete. Need to create an interface in the JSONlist class to be able to test it. Operator overloads ahoy!
 
