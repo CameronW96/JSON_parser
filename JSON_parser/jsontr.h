@@ -31,11 +31,11 @@ namespace cjw
 		class Node
 		{
 			friend class JSON_List;
-			using var_t = std::variant<int, bool, double, std::string, std::shared_ptr<Node>>;
-
 		private:
 			class JSON_Value
-			{
+			{ // TODO: Refactor to use std::unique_ptr
+				// TODO: Remove Node*
+				using var_t = std::variant<int, bool, double, std::string, Node*,  std::shared_ptr<Node>, std::shared_ptr<std::vector<JSON_Value>>>;
 			public:
 				var_t m_value_individual = 0;
 			};
@@ -49,6 +49,14 @@ namespace cjw
 
 			public:
 				static JSON_KVP make_kvp(std::string t_key, JSON_Value t_value)
+				{
+					JSON_KVP temp_kvp;
+					temp_kvp.m_key = t_key;
+					temp_kvp.m_value = t_value;
+					return temp_kvp;
+				}
+
+				static JSON_KVP make_kvp_array(std::string t_key, std::vector<JSON_Value> t_value)
 				{
 					JSON_KVP temp_kvp;
 					temp_kvp.m_key = t_key;
@@ -126,30 +134,15 @@ namespace cjw
 			// object must be populated with object_push
 			void init_object (const std::string &t_key, std::vector<JSON_KVP> t_value_object)
 			{
-				/*JSON_Value temp_value;
-
-				JSON_KVP temp_kvp;
-				temp_kvp.m_value = temp_value;
-
-				std::unique_ptr<Node> temp_node(new Node);
-				temp_node->m_is_object = true;
-				temp_node->m_kvp = temp_kvp;
-
-				JSON_Value init_value;
-				init_value.m_value_individual = std::move(&temp_node);
-
-				JSON_KVP init_kvp;
-				init_kvp.m_key = t_key;
-				init_kvp.m_value = init_value;
-
-				m_kvp = init_kvp;*/
-
 				m_is_object = true;
 				m_object_key = t_key;
 				m_kvp = t_value_object;
 			}
 
 			// **** ARRAY MANIPULATION ****
+
+			// TODO: Refactor array manipulation to support the nested array modifications. Must be able to determine
+			// if a node is an object or an array.
 
 			// helper method that pushes a JSON_Value object into the current nodes array
 			// returns false if node does not contain an array or true on success
@@ -216,7 +209,7 @@ namespace cjw
 					return false;
 				}
 			}
-			bool array_push_object (const Node* &t_input)
+			bool array_push_object (const std::shared_ptr<Node> &t_input)
 			{
 				JSON_Value temp_value;
 				temp_value.m_value_individual = t_input;
@@ -473,46 +466,21 @@ namespace cjw
 		*/
 		static int check_type(std::string t_string_input)
 		{
-			std::string::iterator it = t_string_input.begin();
-			if (*it == '"') // check for string
+			if (t_string_input[0] == '"') // check for string
 			{
 				return 4;
 			}
-			else if (*it == '[')
+			else if (t_string_input[0] == '[')
 			{
 				return 6;
 			}
-			else if (*it == '{') // check for object
+			else if (t_string_input[0] == '{') // check for object
 			{
 				return 5;
 			}
-			else if (*it == 'f' || *it == 't') // check for bool
+			else if (t_string_input[0] == 'f' || t_string_input[0] == 't') // check for bool
 			{
-				std::string temp_buf;
-				for (int i = 0; i < 5; i++)
-				{
-					if (it == t_string_input.end())
-					{
-						break;
-					}
-					else
-					{
-						temp_buf.push_back(*it);
-						it++;
-					}
-				}
-				if (temp_buf == "false")
-				{
-					return 3;
-				}
-				else
-				{
-					temp_buf.pop_back();
-					if (temp_buf == "true")
-					{
-						return 3;
-					}
-				}
+				return 3;
 			}
 			else
 			{
@@ -558,15 +526,21 @@ namespace cjw
 			while (*it == ' ') { it++; }
 			// return an empty kvp array if not reading a JSON object
 			if (*it != '{') { return temp_kvp_array; }
-
+			// move iterator off of the opening brace
+			it++;
 			// loop through key value pairs
-			while (*it != '}')
+			while (true)
 			{
 				// skip white space in-between blocks
-				if (*it == ' ')
+				while (*it == ' ' || *it == ',')
 				{
 					it++;
-					continue;
+				}
+				// check for end of object - this has to happen after the whitespace has been skipped
+				// or the iterator goes off the end of the string.
+				if (*it == '}') 
+				{
+					break;
 				}
 				// read key
 				if (*it == '"')
@@ -585,15 +559,50 @@ namespace cjw
 						key.push_back(*it);
 						it++;
 					}
-				}
-				// read value
-				while (*it != ',' & *it != '}')
-				{
-					value.push_back(*it);
 					it++;
 				}
-
-				temp_kvp_array.push_back(Node::JSON_KVP::make_kvp(key, get_value(value)));
+				// skip white space in-between blocks
+				while (*it == ' ')
+				{
+					it++;
+				}
+				// read value
+				if (*it == '[') // array
+				{
+					while (*it != ']')
+					{
+						value.push_back(*it);
+						it++;
+					}
+					value.push_back(*it);
+				}
+				else if (*it == '{') // object
+				{
+					while (*it != '}')
+					{
+						value.push_back(*it);
+						it++;
+					}
+					value.push_back(*it); // push closing brace - read object will overflow without it
+				}
+				else // primitive
+				{
+					while (*it != ',' && *it != '}')
+					{
+						value.push_back(*it);
+						it++;
+					}
+				}
+				
+				std::vector<Node::JSON_Value> value_vector = get_value(value);
+				if (value_vector.size() > 1) // is an array
+				{
+					temp_kvp_array.push_back(Node::JSON_KVP::make_kvp_array(key, value_vector));
+				}
+				else // not an array
+				{
+					temp_kvp_array.push_back(Node::JSON_KVP::make_kvp(key, get_value(value)[0]));
+				}
 
 				if (*it == '}')
 				{
@@ -601,15 +610,68 @@ namespace cjw
 				}
 				else
 				{
+					key = "";
+					value = "";
 					it++;
 				}
 			}
 			return temp_kvp_array;
 		}
 
-		static Node::JSON_KVP read_array(const std::string& t_input, std::string::iterator& t_iterator)
+		static std::vector<Node::JSON_Value> read_array(std::string t_array_input)
 		{
+			std::string::iterator it = t_array_input.begin();
+			std::vector<Node::JSON_Value> temp_value_array;
+			std::string value;
 
+			// skip any leading white space
+			while (*it == ' ') { it++; }
+			// return an empty value array if not reading an array
+			if (*it != '[') { return temp_value_array; }
+			// move iterator off opening bracket
+			it++;
+			// loop through values
+			while (*it != ']')
+			{
+				// skip white space in-between blocks
+				if (*it == ' ')
+				{
+					it++;
+					continue;
+				}
+				// read value
+				while (*it != ',' && *it != ']')
+				{
+						value.push_back(*it);
+						it++;
+				}
+
+				std::vector<Node::JSON_Value> value_vector = get_value(value);
+				if (value_vector.size() > 1) // is an array
+				{
+					std::shared_ptr<std::vector<Node::JSON_Value>> nested_array(new std::vector<Node::JSON_Value>);
+					*nested_array = value_vector;
+					Node::JSON_Value temp_value;
+					temp_value.m_value_individual = nested_array;
+					temp_value_array.push_back(temp_value);
+				}
+				else // not an array
+				{
+					Node::JSON_Value temp_value = value_vector[0];
+					temp_value_array.push_back(temp_value);
+				}
+
+				if (*it == ']')
+				{
+					break;
+				}
+				else
+				{
+					value = "";
+					it++;
+				}
+			}
+			return temp_value_array;
 		}
 
 		/**
@@ -679,9 +741,9 @@ namespace cjw
 		* @param t_string_input std::string input to extract the value from.
 		* @returns A JSON_Value object.
 		*/
-		static Node::JSON_Value get_value(std::string t_value_input)
+		static std::vector<Node::JSON_Value> get_value(std::string t_value_input)
 		{
-			Node::JSON_Value temp_value;
+			std::vector<Node::JSON_Value> temp_vector;
 			// format input
 			std::string value = format_value(t_value_input);
 			// get type of input
@@ -691,23 +753,26 @@ namespace cjw
 			{
 			case 0: // invalid input
 			{
-				return temp_value;
+				return temp_vector;
 				break;
 			}
 			case 1: // integer
 			{
+				Node::JSON_Value temp_value;
 				temp_value.m_value_individual = convert_to_int(value);
-				return temp_value;
+				temp_vector.push_back(temp_value);
 				break;
 			}
 			case 2: // double
 			{
+				Node::JSON_Value temp_value;
 				temp_value.m_value_individual = convert_to_double(value);
-				return temp_value;
+				temp_vector.push_back(temp_value);
 				break;
 			}
 			case 3: // bool
 			{
+				Node::JSON_Value temp_value;
 				bool temp_bool;
 				if (value == "true")
 				{
@@ -718,29 +783,33 @@ namespace cjw
 					temp_bool = false;
 				}
 				temp_value.m_value_individual = temp_bool;
-				return temp_value;
+				temp_vector.push_back(temp_value);
 				break;
 			}
 			case 4: // string
 			{
+				Node::JSON_Value temp_value;
+				remove_quotes(value);
 				temp_value.m_value_individual = value;
-				return temp_value;
+				temp_vector.push_back(temp_value);
 				break;
 			}
 			case 5: // node
 			{
+				Node::JSON_Value temp_value;
 				std::shared_ptr<Node> temp_node_object(new Node);
 				temp_node_object->init_object("", read_object(value));
 				temp_value.m_value_individual = temp_node_object;
-				return temp_value;
+				temp_vector.push_back(temp_value);
 				break;
 			}
 			case 6: // array
 			{
-				// must call read_array
+				temp_vector = read_array(value);
 				break;
 			}
 			}	
+			return temp_vector;
 		}
 
 	public:
