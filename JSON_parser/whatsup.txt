@@ -3,6 +3,22 @@ So...
 It's come to this...
 
 ==================================================================================================================================================================
+Status Update - 8/08/2021 12:29 PM
+	Still working on the array and dot notation. This is going to get complicated and the model for storing the JSON object may make things more difficult.
+	Going to take a break for a little while to focus on Java. 
+
+	Didn't take a break or focus on Java. Instead I managed to finish the dot notation model and worked through the bugs. Also got r_string working. Currently it only
+	has one simple test so it needs more testing and we need to be able to return the rest of the primitive types.
+
+Status Update - 8/04/2021 11:13 AM
+	Parser seems to be working now. Need to build the access notation functions and the return functions. Working through the structure in my head it seems that pretty much all of
+	the return functions created for the Node class will be obsolete. The return functions will need to be overloaded for the JSON_list class to be able to handle a reference to 
+	either a JSON_KVP or JSON_Value. There will also need to be checks to ensure we are not trying to return an object or an array as only primitive types will be returnable.
+
+	Hold on. Now that I'm thinking about it the functions should only work with a JSON_Value reference. If a KVP is returned from one of the access functions then we are looking
+	at an object - not a primitive data type. Compile time checking on this will not be possible so we'll have to be able to return a null value from the return functions. Either that or
+	use exceptions... which will make the library even clunkier to use for the end user. 
+
 Status Update - 7/22/2021 1:49 PM
 	More problems... nested objects need to be able to know they're reading a nested object or it falsley reads the end brace as the end of the outer object. Similar to the array problem.
 
