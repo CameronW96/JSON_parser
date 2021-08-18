@@ -23,6 +23,14 @@
 #include <sstream>
 #include <algorithm>
 
+constexpr auto KVP_TYPE_ERR = "KVP TYPE ERR: INVALID TYPE ASSUMPTION";
+constexpr auto VALUE_TYPE_ERR = "VALUE TYPE ERR: INVALID TYPE ASSUMPTION";
+constexpr auto ARRAY_ERR = "ARRAY ERR: PATH DOES NOT CONTAIN ARRAY";
+constexpr auto ARRAY_ERR_INDEX = "ARRAY ERR: OUT OF BOUNDS INDEX";
+constexpr auto OBJECT_ERR = "OBJECT ERR: PATH DOES NOT CONTAIN OBJECT";
+constexpr auto UNEXPECTED_TYPE_ERR = "TYPE ERR: TYPE CONTAINED DOES NOT MATCH TYPE REQUESTETD";
+constexpr auto RETURN_TYPE_ERR = "TYPE ERR: CANNOT RETURN NON-PRIMITIVE TYPE";
+
 namespace cjw
 {
 
@@ -50,11 +58,11 @@ namespace cjw
 					std::shared_ptr<std::vector<JSON_Value>>* temp_value_array = std::get_if<std::shared_ptr<std::vector<JSON_Value>>>(&m_value_individual);
 					if (temp_value_array == nullptr)
 					{
-						throw "non array node";
+						throw ARRAY_ERR;
 					}
 					else if (t_index > (*temp_value_array)->size())
 					{
-						throw "invalid index";
+						throw ARRAY_ERR_INDEX;
 					}
 					else
 					{
@@ -71,7 +79,7 @@ namespace cjw
 					std::shared_ptr<Node>* temp_node = std::get_if<std::shared_ptr<Node>>(&m_value_individual);
 					if (temp_node == nullptr)
 					{
-						throw "value does not contain node";
+						throw OBJECT_ERR;
 					}
 
 					JSON_KVP& temp_kvp = (*temp_node)->find_by_key(t_key);
@@ -113,11 +121,11 @@ namespace cjw
 					std::vector<JSON_Value>* temp_value_array = std::get_if<std::vector<JSON_Value>>(&m_value);
 					if (temp_value_array == nullptr)
 					{
-						throw "non array node";
+						throw ARRAY_ERR;
 					}
 					else if (t_index > temp_value_array->size())
 					{
-						throw "invalid index";
+						throw ARRAY_ERR_INDEX;
 					}
 					else
 					{
@@ -133,13 +141,13 @@ namespace cjw
 					JSON_Value* temp_value = std::get_if<JSON_Value>(&m_value);
 					if (temp_value == nullptr)
 					{
-						throw "kvp does not contain node";
+						throw OBJECT_ERR;
 					}
 					// get pointer to m_value_individual - stored in m_value
 					std::shared_ptr<Node>* temp_node = std::get_if<std::shared_ptr<Node>>(&temp_value->m_value_individual);
 					if (temp_node == nullptr)
 					{
-						throw "value does not contain node";
+						throw OBJECT_ERR;
 					}
 
 					JSON_KVP& temp_kvp = (*temp_node)->find_by_key(t_key);
@@ -160,7 +168,7 @@ namespace cjw
 				std::vector<Node::JSON_KVP>* temp_kvp_array = std::get_if<std::vector<Node::JSON_KVP>>(&m_kvp);
 				if (temp_kvp_array == nullptr)
 				{
-					throw "non array node";
+					throw ARRAY_ERR;
 				}
 				else
 				{
@@ -249,108 +257,108 @@ namespace cjw
 
 			// helper method that pushes a JSON_Value object into the current nodes array
 			// returns false if node does not contain an array or true on success
-			bool array_push(const JSON_Value &t_value)
-			{
-				JSON_KVP* kvp_ptr = std::get_if<JSON_KVP>(&m_kvp);
-				if (kvp_ptr == nullptr) { return false; } // check to ensure node contains the assumed data type (JSON_KVP vs. std::vector<JSON_KVP>)
+			//bool array_push(const JSON_Value &t_value)
+			//{
+			//	JSON_KVP* kvp_ptr = std::get_if<JSON_KVP>(&m_kvp);
+			//	if (kvp_ptr == nullptr) { return false; } // check to ensure node contains the assumed data type (JSON_KVP vs. std::vector<JSON_KVP>)
 
-				std::vector<JSON_Value>* value_ptr = std::get_if<std::vector<JSON_Value>>(&kvp_ptr->m_value);
-				if (value_ptr == nullptr) { return false; } // check to ensure KVP contains the assumed data type (JSON_Value vs. std::vector<JSON_Value>)
+			//	std::vector<JSON_Value>* value_ptr = std::get_if<std::vector<JSON_Value>>(&kvp_ptr->m_value);
+			//	if (value_ptr == nullptr) { return false; } // check to ensure KVP contains the assumed data type (JSON_Value vs. std::vector<JSON_Value>)
 
-				value_ptr->push_back(t_value);
-				return true;
-			}
-			bool array_push_int (const int &t_input)
-			{
-				JSON_Value temp_value;
-				temp_value.m_value_individual = t_input;
-				if (array_push(temp_value))
-				{
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-			bool array_push_bool (const bool &t_input)
-			{
-				JSON_Value temp_value;
-				temp_value.m_value_individual = t_input;
-				if (array_push(temp_value))
-				{
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-			bool array_push_fpoint (const double &t_input)
-			{
-				JSON_Value temp_value;
-				temp_value.m_value_individual = t_input;
-				if (array_push(temp_value))
-				{
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-			bool array_push_string (const std::string &t_input)
-			{
-				JSON_Value temp_value;
-				temp_value.m_value_individual = t_input;
-				if (array_push(temp_value))
-				{
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-			bool array_push_object (const std::shared_ptr<Node> &t_input)
-			{
-				JSON_Value temp_value;
-				temp_value.m_value_individual = t_input;
-				if (array_push(temp_value))
-				{
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
+			//	value_ptr->push_back(t_value);
+			//	return true;
+			//}
+			//bool array_push_int (const int &t_input)
+			//{
+			//	JSON_Value temp_value;
+			//	temp_value.m_value_individual = t_input;
+			//	if (array_push(temp_value))
+			//	{
+			//		return true;
+			//	}
+			//	else
+			//	{
+			//		return false;
+			//	}
+			//}
+			//bool array_push_bool (const bool &t_input)
+			//{
+			//	JSON_Value temp_value;
+			//	temp_value.m_value_individual = t_input;
+			//	if (array_push(temp_value))
+			//	{
+			//		return true;
+			//	}
+			//	else
+			//	{
+			//		return false;
+			//	}
+			//}
+			//bool array_push_fpoint (const double &t_input)
+			//{
+			//	JSON_Value temp_value;
+			//	temp_value.m_value_individual = t_input;
+			//	if (array_push(temp_value))
+			//	{
+			//		return true;
+			//	}
+			//	else
+			//	{
+			//		return false;
+			//	}
+			//}
+			//bool array_push_string (const std::string &t_input)
+			//{
+			//	JSON_Value temp_value;
+			//	temp_value.m_value_individual = t_input;
+			//	if (array_push(temp_value))
+			//	{
+			//		return true;
+			//	}
+			//	else
+			//	{
+			//		return false;
+			//	}
+			//}
+			//bool array_push_object (const std::shared_ptr<Node> &t_input)
+			//{
+			//	JSON_Value temp_value;
+			//	temp_value.m_value_individual = t_input;
+			//	if (array_push(temp_value))
+			//	{
+			//		return true;
+			//	}
+			//	else
+			//	{
+			//		return false;
+			//	}
+			//}
 
 			// **** OBJECT MANIPULATION ****
 
 			// pushes a previously constructed KVP
-			bool object_push (const JSON_KVP &t_input)
-			{
-				std::vector<JSON_KVP>* obj_ptr = std::get_if<std::vector<JSON_KVP>>(&m_kvp);
-				if (obj_ptr == nullptr) { return false; } // check to ensure KVP contains the assumed data type (std::vector<JSON_KVP> vs. JSON_KVP)
+			//bool object_push (const JSON_KVP &t_input)
+			//{
+			//	std::vector<JSON_KVP>* obj_ptr = std::get_if<std::vector<JSON_KVP>>(&m_kvp);
+			//	if (obj_ptr == nullptr) { return false; } // check to ensure KVP contains the assumed data type (std::vector<JSON_KVP> vs. JSON_KVP)
 
-				obj_ptr->push_back(t_input);
-				return true;
-			}
+			//	obj_ptr->push_back(t_input);
+			//	return true;
+			//}
 
 			// **** STATE GETTERS ****
 
 			// returns the state of this node
 			// 1 = primitive KVP, 2 = object, 3 = array
-			int get_state ()
-			{}
+			/*int get_state ()
+			{}*/
 
 			// returns the value type
 			// 0 = VOID/NULL, 1 = int, 2 = bool, 3 = double, 4 = string, 5 = object
-			int get_value_type ()
-			{}
+			/*int get_value_type ()
+			{}*/
 			
-			std::string get_key ()
+			/*std::string get_key ()
 			{
 				if (m_is_object == true)
 				{ 
@@ -361,13 +369,13 @@ namespace cjw
 					JSON_KVP* kvp_ptr = std::get_if<JSON_KVP>(&m_kvp);
 					return kvp_ptr->m_key;
 				}
-			}
+			}*/
 
-			// **** VALUE GETTERS ****
+			// **** VALUE GETTERS **** NOT USED
 
 			// returns value as type requested
 			// throws "bad_type" if type does not match
-			int get_value_as_int ()
+			/*int get_value_as_int ()
 			{
 				JSON_KVP* kvp_ptr = std::get_if<JSON_KVP>(&m_kvp);
 				JSON_Value* value_ptr = std::get_if<JSON_Value>(&kvp_ptr->m_value);
@@ -380,8 +388,8 @@ namespace cjw
 				{
 					throw "bad_type";
 				}
-			}
-			bool get_value_as_bool ()
+			}*/
+			/*bool get_value_as_bool ()
 			{
 				JSON_KVP* kvp_ptr = std::get_if<JSON_KVP>(&m_kvp);
 				JSON_Value* value_ptr = std::get_if<JSON_Value>(&kvp_ptr->m_value);
@@ -394,8 +402,8 @@ namespace cjw
 				{
 					throw "bad_type";
 				}
-			}
-			double get_value_as_fpoint ()
+			}*/
+			/*double get_value_as_fpoint ()
 			{
 				JSON_KVP* kvp_ptr = std::get_if<JSON_KVP>(&m_kvp);
 				JSON_Value* value_ptr = std::get_if<JSON_Value>(&kvp_ptr->m_value);
@@ -408,8 +416,8 @@ namespace cjw
 				{
 					throw "bad_type";
 				}
-			}
-			std::string get_value_as_string ()
+			}*/
+			/*std::string get_value_as_string ()
 			{
 				JSON_KVP* kvp_ptr = std::get_if<JSON_KVP>(&m_kvp);
 				JSON_Value* value_ptr = std::get_if<JSON_Value>(&kvp_ptr->m_value);
@@ -422,8 +430,8 @@ namespace cjw
 				{
 					throw "bad_type";
 				}
-			}
-			Node* get_value_as_object ()
+			}*/
+			/*Node* get_value_as_object ()
 			{
 				JSON_KVP* kvp_ptr = std::get_if<JSON_KVP>(&m_kvp);
 				JSON_Value* value_ptr = std::get_if<JSON_Value>(&kvp_ptr->m_value);
@@ -436,9 +444,9 @@ namespace cjw
 				{
 					throw "bad_type";
 				}
-			}
+			}*/
 
-			int get_array_value_as_int (int t_index)
+		/*	int get_array_value_as_int (int t_index)
 			{
 				JSON_KVP* kvp_ptr = std::get_if<JSON_KVP>(&m_kvp);
 				std::vector<JSON_Value>* value_ptr = std::get_if<std::vector<JSON_Value>>(&kvp_ptr->m_value);
@@ -453,8 +461,8 @@ namespace cjw
 				{
 					throw "bad_type";
 				}
-			}
-			bool get_array_value_as_bool (int t_index)
+			}*/
+			/*bool get_array_value_as_bool (int t_index)
 			{
 				JSON_KVP* kvp_ptr = std::get_if<JSON_KVP>(&m_kvp);
 				std::vector<JSON_Value>* value_ptr = std::get_if<std::vector<JSON_Value>>(&kvp_ptr->m_value);
@@ -469,8 +477,8 @@ namespace cjw
 				{
 					throw "bad_type";
 				}
-			}
-			double get_array_value_as_fpoint (int t_index)
+			}*/
+			/*double get_array_value_as_fpoint (int t_index)
 			{
 				JSON_KVP* kvp_ptr = std::get_if<JSON_KVP>(&m_kvp);
 				std::vector<JSON_Value>* value_ptr = std::get_if<std::vector<JSON_Value>>(&kvp_ptr->m_value);
@@ -485,8 +493,8 @@ namespace cjw
 				{
 					throw "bad_type";
 				}
-			}
-			std::string get_array_value_as_string (int t_index)
+			}*/
+			/*std::string get_array_value_as_string (int t_index)
 			{
 				JSON_KVP* kvp_ptr = std::get_if<JSON_KVP>(&m_kvp);
 				std::vector<JSON_Value>* value_ptr = std::get_if<std::vector<JSON_Value>>(&kvp_ptr->m_value);
@@ -501,8 +509,8 @@ namespace cjw
 				{
 					throw "bad_type";
 				}
-			}
-			Node* get_array_value_as_object (int t_index)
+			}*/
+			/*Node* get_array_value_as_object (int t_index)
 			{
 				JSON_KVP* kvp_ptr = std::get_if<JSON_KVP>(&m_kvp);
 				std::vector<JSON_Value>* value_ptr = std::get_if<std::vector<JSON_Value>>(&kvp_ptr->m_value);
@@ -517,7 +525,7 @@ namespace cjw
 				{
 					throw "bad_type";
 				}
-			}
+			}*/
 		};
 
 	private:
@@ -654,6 +662,11 @@ namespace cjw
 						key.push_back(*it);
 						it++;
 					}
+					while (*it != ':') // skip to value
+					{
+						it++;
+					}
+					it++;
 				}
 				else
 				{
@@ -681,8 +694,20 @@ namespace cjw
 				}
 				else if (*it == '{') // object
 				{
-					while (*it != '}')
+					value.push_back(*it);
+					it++; // move iterator off of opening brace so it is not double counted
+
+					int object_counter = 1;
+					while (object_counter != 0)
 					{
+						if (*it == '{') // must track how many nested objects we are reading 
+						{
+							object_counter++;
+						}
+						else if (*it == '}')
+						{
+							object_counter--;
+						}
 						value.push_back(*it);
 						it++;
 					}
@@ -944,8 +969,9 @@ namespace cjw
 			}
 
 			buf << json_file.rdbuf();
-			output_string.erase(std::remove_if(output_string.begin(), output_string.end(), '\n'), output_string.end()); // remove newlines
-
+			output_string = buf.str();
+			output_string.erase(std::remove(output_string.begin(), output_string.end(), '\n'), output_string.end()); // remove newlines
+			output_string.erase(std::remove(output_string.begin(), output_string.end(), '\r'), output_string.end());
 			return output_string;
 		}
 
@@ -965,7 +991,7 @@ namespace cjw
 			const Node::JSON_Value* temp_value = std::get_if<Node::JSON_Value>(&t_input.m_value);
 			if (temp_value == nullptr)
 			{
-				throw "non primitive type";
+				throw RETURN_TYPE_ERR;
 			}
 			else
 			{
@@ -975,7 +1001,7 @@ namespace cjw
 				}
 				else
 				{
-					throw "not a double";
+					throw UNEXPECTED_TYPE_ERR;
 				}
 			}
 			return r_int;
@@ -997,7 +1023,7 @@ namespace cjw
 			const Node::JSON_Value* temp_value = std::get_if<Node::JSON_Value>(&t_input.m_value);
 			if (temp_value == nullptr)
 			{
-				throw "non primitive type";
+				throw RETURN_TYPE_ERR;
 			}
 			else
 			{
@@ -1007,7 +1033,7 @@ namespace cjw
 				}
 				else
 				{
-					throw "not a double";
+					throw UNEXPECTED_TYPE_ERR;
 				}
 			}
 
@@ -1030,7 +1056,7 @@ namespace cjw
 			const Node::JSON_Value* temp_value = std::get_if<Node::JSON_Value>(&t_input.m_value);
 			if (temp_value == nullptr)
 			{
-				throw "non primitive type";
+				throw RETURN_TYPE_ERR;
 			}
 			else
 			{
@@ -1040,7 +1066,7 @@ namespace cjw
 				}
 				else
 				{
-					throw "not a bool";
+					throw UNEXPECTED_TYPE_ERR;
 				}
 			}
 
@@ -1063,7 +1089,7 @@ namespace cjw
 			const Node::JSON_Value* temp_value = std::get_if<Node::JSON_Value>(&t_input.m_value);
 			if (temp_value == nullptr)
 			{
-				throw "non primitive type";
+				throw RETURN_TYPE_ERR;
 			}
 			else
 			{
@@ -1073,7 +1099,7 @@ namespace cjw
 				}
 				else
 				{
-					throw "not a string";
+					throw UNEXPECTED_TYPE_ERR;
 				}
 			}
 
@@ -1088,11 +1114,11 @@ namespace cjw
 			std::vector<Node::JSON_KVP>* temp_kvp_array = std::get_if<std::vector<Node::JSON_KVP>>(&main_list.m_kvp);
 			if (temp_kvp_array == nullptr)
 			{
-				throw "non array node";
+				throw ARRAY_ERR;
 			}
 			else if (t_index > temp_kvp_array->size())
 			{
-				throw "invalid index";
+				throw ARRAY_ERR_INDEX;
 			}
 			else
 			{
@@ -1105,6 +1131,68 @@ namespace cjw
 		Node::JSON_KVP& d_n(std::string t_key)
 		{
 			return main_list.find_by_key(t_key);
+		}
+
+		// ****UPDATE FUNCTIONS****
+
+		void static update_key(std::string t_new_key, Node::JSON_KVP& t_object)
+		{
+			t_object.m_key = t_new_key;
+		}
+		void static update_value(int t_new_value, Node::JSON_KVP& t_object)
+		{
+			Node::JSON_Value* value_ptr = std::get_if<Node::JSON_Value>(&t_object.m_value);
+			value_ptr->m_value_individual = t_new_value;
+		}
+		void static update_value(double t_new_value, Node::JSON_KVP& t_object)
+		{
+			Node::JSON_Value* value_ptr = std::get_if<Node::JSON_Value>(&t_object.m_value);
+			value_ptr->m_value_individual = t_new_value;
+		}
+		void static update_value(bool t_new_value, Node::JSON_KVP& t_object)
+		{
+			Node::JSON_Value* value_ptr = std::get_if<Node::JSON_Value>(&t_object.m_value);
+			value_ptr->m_value_individual = t_new_value;
+		}
+		void static update_value(std::string t_new_value, Node::JSON_KVP& t_object)
+		{
+			Node::JSON_Value* value_ptr = std::get_if<Node::JSON_Value>(&t_object.m_value);
+			value_ptr->m_value_individual = t_new_value;
+		}
+		void static update_value(int t_new_value, Node::JSON_Value& t_value)
+		{
+			t_value.m_value_individual = t_new_value;
+		}
+		void static update_value(double t_new_value, Node::JSON_Value& t_value)
+		{
+			t_value.m_value_individual = t_new_value;
+		}
+		void static update_value(bool t_new_value, Node::JSON_Value& t_value)
+		{
+			t_value.m_value_individual = t_new_value;
+		}
+		void static update_value(std::string t_new_value, Node::JSON_Value& t_value)
+		{
+			t_value.m_value_individual = t_new_value;
+		}
+
+		// ****DELETE FUNCTIONS****
+
+		void static delete_primitive(Node::JSON_KVP& t_object)
+		{
+
+		}
+		void static delete_primitive(Node::JSON_Value& t_value)
+		{
+			delete &t_value; // not a good idea
+		}
+		void static delete_object(Node::JSON_KVP& t_object)
+		{
+
+		}
+		void static delete_object(Node::JSON_Value& t_value)
+		{
+
 		}
 
 		/**

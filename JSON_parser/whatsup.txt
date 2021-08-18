@@ -3,6 +3,11 @@ So...
 It's come to this...
 
 ==================================================================================================================================================================
+Status Update - 8/18/2021 03:36 PM
+	Much less time now that school has started *sigh*. Surprisingly the update functions were fairly simple to implement and they actually work! Next steps are now to implement the delete
+	functions and the serializer. After that the code needs to be cleaned up a bit. The delete functions are probably going to need to work with the vector's .pop function, as calling delete
+	directly is going to leave KVP's potentially uninitialized.
+
 Status Update - 8/08/2021 12:29 PM
 	Still working on the array and dot notation. This is going to get complicated and the model for storing the JSON object may make things more difficult.
 	Going to take a break for a little while to focus on Java. 
