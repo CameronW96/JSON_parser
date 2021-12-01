@@ -9,6 +9,8 @@ Debug/
 JSON_parser/docs/
 JSON_parser/debug
 *.json
+*.vcxproj.*
+Doxyfile
 
 # User-specific files
 *.rsuser
