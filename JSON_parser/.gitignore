@@ -1,9 +1,0 @@
-/Debug
-/docs
-/x64
-Doxyfile.*
-*.json
-*.vcxproj
-*.vcxproj.filters
-*.vcxproj.user
-whatsup.txt
