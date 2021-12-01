@@ -3,6 +3,13 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# Other files
+JSON_TEST/
+Debug/
+JSON_parser/docs/
+JSON_parser/debug
+*.json
+
 # User-specific files
 *.rsuser
 *.suo
