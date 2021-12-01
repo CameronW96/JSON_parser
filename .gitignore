@@ -8,11 +8,11 @@ JSON_TEST/
 Debug/
 JSON_parser/docs/
 JSON_parser/debug
-*.json
-*.vcxproj
-*.vcxproj.filters
-*.vcxproj.users
-Doxyfile.*
+JSON_parser/*.json
+JSON_parser/*.vcxproj
+JSON_parser/*.vcxproj.filters
+JSON_parser/*.vcxproj.users
+JSON_parser/Doxyfile
 
 # User-specific files
 *.rsuser
