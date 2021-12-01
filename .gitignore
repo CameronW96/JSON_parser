@@ -13,6 +13,7 @@ JSON_parser/*.vcxproj
 JSON_parser/*.vcxproj.filters
 JSON_parser/*.vcxproj.users
 JSON_parser/Doxyfile
+JSON_parser/main.cpp
 
 # User-specific files
 *.rsuser
