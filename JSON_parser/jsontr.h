@@ -22,7 +22,6 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
-#include <iostream>
 
 constexpr auto KVP_TYPE_ERR = "KVP TYPE ERR: INVALID TYPE ASSUMPTION";
 constexpr auto VALUE_TYPE_ERR = "VALUE TYPE ERR: INVALID TYPE ASSUMPTION";
@@ -43,7 +42,6 @@ namespace cjw
 			friend class JSON_List;
 		private:
 			class JSON_KVP; // forward declare
-
 			class JSON_Value
 			{ // TODO: Refactor to use std::unique_ptr
 				// TODO: Remove Node*
@@ -160,7 +158,7 @@ namespace cjw
 		private:
 			// specifies whether this node is a JSON object
 			// m_value should be initialized to a vector in this case
-			bool m_is_object = false; // TODO - Eliminate this
+			bool m_is_object = false;
 			std::string m_object_key;
 			std::variant<JSON_KVP, std::vector<JSON_KVP>> m_kvp;
 
@@ -184,6 +182,7 @@ namespace cjw
 					}
 				}
 			}
+
 			std::pair<std::vector<Node::JSON_KVP>*, int> recursive_find_parent_vector_and_index(std::string t_key, int t_function_level = 0) // Can't think of any creative names
 			{
 				std::vector<Node::JSON_KVP>* temp_kvp_array = std::get_if<std::vector<Node::JSON_KVP>>(&m_kvp);
@@ -960,6 +959,7 @@ namespace cjw
 			(*temp_array_ptr)->erase((*temp_array_ptr)->begin() + t_index);
 		}
 		void static remove_from_array(Node::JSON_KVP& t_object, int t_index)
+
 		{
 			Node::JSON_Value* temp_value_ptr = std::get_if<Node::JSON_Value>(&t_object.m_value);
 			remove_from_array(*temp_value_ptr, t_index);
