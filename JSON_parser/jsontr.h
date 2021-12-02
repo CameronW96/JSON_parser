@@ -184,7 +184,7 @@ namespace cjw
 					}
 				}
 			}
-			std::pair<std::vector<Node::JSON_KVP>*, int> recursive_find_by_key_and_return_parent_vector_and_index(std::string t_key) // Can't think of any creative names
+			std::pair<std::vector<Node::JSON_KVP>*, int> recursive_find_parent_vector_and_index(std::string t_key, int t_function_level = 0) // Can't think of any creative names
 			{
 				std::vector<Node::JSON_KVP>* temp_kvp_array = std::get_if<std::vector<Node::JSON_KVP>>(&m_kvp);
 				std::pair<std::vector<Node::JSON_KVP>*, int> return_value;
@@ -200,11 +200,20 @@ namespace cjw
 						Node::JSON_Value* temp_value = std::get_if<JSON_Value>(&temp_kvp.m_value);
 						if (temp_value != nullptr && std::holds_alternative<std::shared_ptr<Node>>(temp_value->m_value_individual))
 						{
+							std::pair<std::vector<Node::JSON_KVP>*, int> temp_pair = std::make_pair(nullptr, 0);
 							std::shared_ptr<Node>* temp_node = std::get_if<std::shared_ptr<Node>>(&temp_value->m_value_individual);
 							if (std::holds_alternative<std::vector<Node::JSON_KVP>>((*temp_node)->m_kvp))
 							{
-								return (*temp_node)->recursive_find_by_key_and_return_parent_vector_and_index(t_key);
-							}							
+								temp_pair = (*temp_node)->recursive_find_parent_vector_and_index(t_key, t_function_level + 1);
+								if (t_function_level > 0)
+								{
+									return temp_pair;
+								}
+								else if (t_function_level == 0 && temp_pair.first != nullptr)
+								{
+									return temp_pair;
+								}
+							}
 						}
 						else if (format_value(temp_kvp.m_key) == t_key)
 						{
@@ -937,7 +946,7 @@ namespace cjw
 		// ****DELETE FUNCTIONS****
 		void remove_first_of(std::string t_key)
 		{
-			std::pair<std::vector<Node::JSON_KVP>*, int> vector_reference_and_index = main_list.recursive_find_by_key_and_return_parent_vector_and_index(t_key);
+			std::pair<std::vector<Node::JSON_KVP>*, int> vector_reference_and_index = main_list.recursive_find_parent_vector_and_index(t_key);
 			if (vector_reference_and_index.first != nullptr)
 			{
 				std::vector<Node::JSON_KVP>* temp_vector_ptr = vector_reference_and_index.first;
