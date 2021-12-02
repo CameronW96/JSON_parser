@@ -943,7 +943,7 @@ namespace cjw
 		}
 
 		// ****DELETE FUNCTIONS****
-		void remove_first_foundf(std::string t_key)
+		void remove_first_found(std::string t_key)
 		{
 			std::pair<std::vector<Node::JSON_KVP>*, int> vector_reference_and_index = main_list.recursive_find_parent_vector_and_index(t_key);
 			if (vector_reference_and_index.first != nullptr)
