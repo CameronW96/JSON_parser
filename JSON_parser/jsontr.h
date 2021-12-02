@@ -944,7 +944,7 @@ namespace cjw
 		}
 
 		// ****DELETE FUNCTIONS****
-		void remove_first_of(std::string t_key)
+		void remove_first_found(std::string t_key)
 		{
 			std::pair<std::vector<Node::JSON_KVP>*, int> vector_reference_and_index = main_list.recursive_find_parent_vector_and_index(t_key);
 			if (vector_reference_and_index.first != nullptr)
@@ -956,22 +956,33 @@ namespace cjw
 		}
 		void static remove_from_array(Node::JSON_Value& t_array, int t_index)
 		{
-			std::shared_ptr<std::vector<Node::JSON_Value>>* temp_array = std::get_if<std::shared_ptr<std::vector<Node::JSON_Value>>>(&t_array.m_value_individual);
-			(*temp_array)->erase((*temp_array)->begin() + t_index);
+			std::shared_ptr<std::vector<Node::JSON_Value>>* temp_array_ptr = std::get_if<std::shared_ptr<std::vector<Node::JSON_Value>>>(&t_array.m_value_individual);
+			(*temp_array_ptr)->erase((*temp_array_ptr)->begin() + t_index);
 		}
 		void static remove_from_array(Node::JSON_KVP& t_object, int t_index)
 		{
-			Node::JSON_Value* temp_value = std::get_if<Node::JSON_Value>(&t_object.m_value);
-			remove_from_array(*temp_value, t_index);
+			Node::JSON_Value* temp_value_ptr = std::get_if<Node::JSON_Value>(&t_object.m_value);
+			remove_from_array(*temp_value_ptr, t_index);
 		}
 		void static remove_from_object(Node::JSON_KVP& t_object, std::string t_key)
 		{
-			
+			Node::JSON_Value* temp_value_ptr = std::get_if<Node::JSON_Value>(&t_object.m_value);
+			std::shared_ptr<Node>* temp_node_ptr = std::get_if<std::shared_ptr<Node>>(&temp_value_ptr->m_value_individual);
+			std::vector<Node::JSON_KVP>* temp_object_vector_ptr = std::get_if<std::vector<Node::JSON_KVP>>(&(*temp_node_ptr)->m_kvp);
+
+			for (int i = 0; i < temp_object_vector_ptr->size(); i++)
+			{
+				Node::JSON_KVP current_object = (*temp_object_vector_ptr)[i];
+				if (format_value(current_object.m_key) == t_key)
+				{
+					temp_object_vector_ptr->erase(temp_object_vector_ptr->begin() + i);
+					break;
+				}
+			}
 		}
 
 		/**
 		* Serializes the contents of the curent JSON_List structure and returns an std::string.
-		* @warning May need to be converted to char[] depending on your use case.
 		*/
 		std::string serialize()
 		{
