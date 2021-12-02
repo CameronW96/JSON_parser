@@ -954,13 +954,19 @@ namespace cjw
 				temp_vector_ptr->erase(temp_vector_ptr->begin() + vector_index);
 			}
 		}
+		void static remove_from_array(Node::JSON_Value& t_array, int t_index)
+		{
+			std::shared_ptr<std::vector<Node::JSON_Value>>* temp_array = std::get_if<std::shared_ptr<std::vector<Node::JSON_Value>>>(&t_array.m_value_individual);
+			(*temp_array)->erase((*temp_array)->begin() + t_index);
+		}
 		void static remove_from_array(Node::JSON_KVP& t_object, int t_index)
 		{
-
+			Node::JSON_Value* temp_value = std::get_if<Node::JSON_Value>(&t_object.m_value);
+			remove_from_array(*temp_value, t_index);
 		}
-		void static remove_from_object(Node::JSON_KVP& t_object)
+		void static remove_from_object(Node::JSON_KVP& t_object, std::string t_key)
 		{
-
+			
 		}
 
 		/**
