@@ -183,6 +183,48 @@ namespace cjw
 				}
 			}
 
+			std::pair<std::vector<Node::JSON_KVP>*, int> recursive_find_parent_vector_and_index(std::string t_key, int t_function_level = 0) // Can't think of any creative names
+			{
+				std::vector<Node::JSON_KVP>* temp_kvp_array = std::get_if<std::vector<Node::JSON_KVP>>(&m_kvp);
+				std::pair<std::vector<Node::JSON_KVP>*, int> return_value;
+				if (temp_kvp_array == nullptr)
+				{
+					throw ARRAY_ERR;
+				}
+				else
+				{
+					for (int i = 0; i < temp_kvp_array->size(); i++)
+					{
+						Node::JSON_KVP& temp_kvp = (*temp_kvp_array)[i];
+						Node::JSON_Value* temp_value = std::get_if<JSON_Value>(&temp_kvp.m_value);
+						if (temp_value != nullptr && std::holds_alternative<std::shared_ptr<Node>>(temp_value->m_value_individual))
+						{
+							std::pair<std::vector<Node::JSON_KVP>*, int> temp_pair = std::make_pair(nullptr, 0);
+							std::shared_ptr<Node>* temp_node = std::get_if<std::shared_ptr<Node>>(&temp_value->m_value_individual);
+							if (std::holds_alternative<std::vector<Node::JSON_KVP>>((*temp_node)->m_kvp))
+							{
+								temp_pair = (*temp_node)->recursive_find_parent_vector_and_index(t_key, t_function_level + 1);
+								if (t_function_level > 0)
+								{
+									return temp_pair;
+								}
+								else if (t_function_level == 0 && temp_pair.first != nullptr)
+								{
+									return temp_pair;
+								}
+							}
+						}
+						else if (format_value(temp_kvp.m_key) == t_key)
+						{
+							return_value.first = temp_kvp_array;
+							return_value.second = i;
+							return return_value;
+						}
+						return std::make_pair(nullptr, -1); // Failed to find key
+					}
+				}
+			}
+
 		public:
 			// **** VALUE SETTERS ****
 
@@ -901,27 +943,46 @@ namespace cjw
 		}
 
 		// ****DELETE FUNCTIONS****
-
-		void static delete_primitive(Node::JSON_KVP& t_object)
+		void remove_first_foundf(std::string t_key)
 		{
-
+			std::pair<std::vector<Node::JSON_KVP>*, int> vector_reference_and_index = main_list.recursive_find_parent_vector_and_index(t_key);
+			if (vector_reference_and_index.first != nullptr)
+			{
+				std::vector<Node::JSON_KVP>* temp_vector_ptr = vector_reference_and_index.first;
+				int vector_index = vector_reference_and_index.second;
+				temp_vector_ptr->erase(temp_vector_ptr->begin() + vector_index);
+			}
 		}
-		void static delete_primitive(Node::JSON_Value& t_value)
+		void static remove_from_array(Node::JSON_Value& t_array, int t_index)
 		{
-			delete &t_value; // not a good idea
+			std::shared_ptr<std::vector<Node::JSON_Value>>* temp_array_ptr = std::get_if<std::shared_ptr<std::vector<Node::JSON_Value>>>(&t_array.m_value_individual);
+			(*temp_array_ptr)->erase((*temp_array_ptr)->begin() + t_index);
 		}
-		void static delete_object(Node::JSON_KVP& t_object)
-		{
+		void static remove_from_array(Node::JSON_KVP& t_object, int t_index)
 
+		{
+			Node::JSON_Value* temp_value_ptr = std::get_if<Node::JSON_Value>(&t_object.m_value);
+			remove_from_array(*temp_value_ptr, t_index);
 		}
-		void static delete_object(Node::JSON_Value& t_value)
+		void static remove_from_object(Node::JSON_KVP& t_object, std::string t_key)
 		{
+			Node::JSON_Value* temp_value_ptr = std::get_if<Node::JSON_Value>(&t_object.m_value);
+			std::shared_ptr<Node>* temp_node_ptr = std::get_if<std::shared_ptr<Node>>(&temp_value_ptr->m_value_individual);
+			std::vector<Node::JSON_KVP>* temp_object_vector_ptr = std::get_if<std::vector<Node::JSON_KVP>>(&(*temp_node_ptr)->m_kvp);
 
+			for (int i = 0; i < temp_object_vector_ptr->size(); i++)
+			{
+				Node::JSON_KVP current_object = (*temp_object_vector_ptr)[i];
+				if (format_value(current_object.m_key) == t_key)
+				{
+					temp_object_vector_ptr->erase(temp_object_vector_ptr->begin() + i);
+					break;
+				}
+			}
 		}
 
 		/**
 		* Serializes the contents of the curent JSON_List structure and returns an std::string.
-		* @warning May need to be converted to char[] depending on your use case.
 		*/
 		std::string serialize()
 		{
