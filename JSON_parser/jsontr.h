@@ -981,6 +981,66 @@ namespace cjw
 			}
 		}
 
+		// Helper functions for serialize()
+		static std::string convert_to_text(int t_input_integer)
+		{
+			std::string return_string = std::to_string(t_input_integer);
+		}
+		static std::string convert_to_text(double t_input_double)
+		{
+			std::string return_string = std::to_string(t_input_double);
+		}
+		static std::string convert_to_text(bool t_input_bool)
+		{
+			std::string return_string = std::to_string(t_input_bool);
+		}
+		static std::string convert_to_text(std::vector<Node::JSON_Value> t_input_array)
+		{
+			std::stringstream output;
+			output << "[";
+
+			for (int i = 0; i < t_input_array.size(); i++)
+			{
+				Node::JSON_Value current_value = t_input_array[i];
+
+				std::string converted_value = std::visit([](auto&& arg) {
+					using T = std::decay_t<decltype(arg)>;
+					if constexpr (std::is_same_v<T, int>)
+						return std::to_string(arg);
+					else if constexpr (std::is_same_v<T, double>)
+						return std::to_string(arg);
+					else if constexpr (std::is_same_v<T, bool>)
+						return std::to_string(arg);
+					else if constexpr (std::is_same_v<T, std::string>)
+						return arg;
+					}, current_value.m_value_individual);
+
+				if (i + 1 < t_input_array.size())
+				{
+					output << converted_value << ", ";
+				}
+				else
+				{
+					output << converted_value << ']';
+				}
+			}
+			return output.str();
+		}
+		static std::string convert_to_text(std::vector<Node::JSON_KVP> t_input_object_array)
+		{
+
+		}
+
+		/**
+		* Serializes the contents of the curent JSON_List structure and returns an std::string.
+		*/
+		std::string serialize()
+		{
+			std::stringstream output;
+			output << "{ ";
+
+		}
+
 		/**
 		* Serializes the contents of the curent JSON_List structure and returns an std::string.
 		*/
