@@ -1040,15 +1040,6 @@ namespace cjw
 			output << "{ ";
 
 		}
-
-		/**
-		* Serializes the contents of the curent JSON_List structure and returns an std::string.
-		*/
-		std::string serialize()
-		{
-
-		}
-		
 	};
 }
 
