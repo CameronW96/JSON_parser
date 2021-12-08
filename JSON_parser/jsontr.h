@@ -854,22 +854,13 @@ namespace cjw
 		{
 			std::string r_string = "";
 			const Node::JSON_Value* temp_value = std::get_if<Node::JSON_Value>(&t_input.m_value);
-			if (temp_value == nullptr)
-			{
-				throw RETURN_TYPE_ERR;
-			}
-			else
+			if (temp_value != nullptr)			
 			{
 				if (std::holds_alternative<std::string>(temp_value->m_value_individual))
 				{
 					r_string = std::get<std::string>(temp_value->m_value_individual);
 				}
-				else
-				{
-					throw UNEXPECTED_TYPE_ERR;
-				}
 			}
-
 			return r_string;
 		}
 
