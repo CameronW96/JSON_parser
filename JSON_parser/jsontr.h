@@ -22,6 +22,7 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <iostream>
 
 constexpr auto KVP_TYPE_ERR = "KVP TYPE ERR: INVALID TYPE ASSUMPTION";
 constexpr auto VALUE_TYPE_ERR = "VALUE TYPE ERR: INVALID TYPE ASSUMPTION";
@@ -45,7 +46,7 @@ namespace cjw
 			class JSON_Value
 			{ // TODO: Refactor to use std::unique_ptr
 				// TODO: Remove Node*
-				using var_t = std::variant<int, bool, double, std::string, Node*,  std::shared_ptr<Node>, std::shared_ptr<std::vector<JSON_Value>>>;
+				using var_t = std::variant<int, bool, double, std::string, std::shared_ptr<Node>, std::shared_ptr<std::vector<JSON_Value>>>;
 			public:
 				var_t m_value_individual = 0;
 
@@ -956,89 +957,222 @@ namespace cjw
 		void static remove_from_array(Node::JSON_Value& t_array, int t_index)
 		{
 			std::shared_ptr<std::vector<Node::JSON_Value>>* temp_array_ptr = std::get_if<std::shared_ptr<std::vector<Node::JSON_Value>>>(&t_array.m_value_individual);
-			(*temp_array_ptr)->erase((*temp_array_ptr)->begin() + t_index);
+			if (temp_array_ptr != nullptr)
+			{
+				(*temp_array_ptr)->erase((*temp_array_ptr)->begin() + t_index);
+			}
 		}
 		void static remove_from_array(Node::JSON_KVP& t_object, int t_index)
 
 		{
-			Node::JSON_Value* temp_value_ptr = std::get_if<Node::JSON_Value>(&t_object.m_value);
-			remove_from_array(*temp_value_ptr, t_index);
+			std::vector<Node::JSON_Value>* temp_value_ptr = std::get_if<std::vector<Node::JSON_Value>>(&t_object.m_value);
+			if (temp_value_ptr != nullptr)
+			{
+				temp_value_ptr->erase(temp_value_ptr->begin() + t_index);
+			}
 		}
 		void static remove_from_object(Node::JSON_KVP& t_object, std::string t_key)
 		{
 			Node::JSON_Value* temp_value_ptr = std::get_if<Node::JSON_Value>(&t_object.m_value);
-			std::shared_ptr<Node>* temp_node_ptr = std::get_if<std::shared_ptr<Node>>(&temp_value_ptr->m_value_individual);
-			std::vector<Node::JSON_KVP>* temp_object_vector_ptr = std::get_if<std::vector<Node::JSON_KVP>>(&(*temp_node_ptr)->m_kvp);
-
-			for (int i = 0; i < temp_object_vector_ptr->size(); i++)
+			if (temp_value_ptr != nullptr)
 			{
-				Node::JSON_KVP current_object = (*temp_object_vector_ptr)[i];
-				if (format_value(current_object.m_key) == t_key)
+				std::shared_ptr<Node>* temp_node_ptr = std::get_if<std::shared_ptr<Node>>(&temp_value_ptr->m_value_individual);
+				if (temp_node_ptr != nullptr)
 				{
-					temp_object_vector_ptr->erase(temp_object_vector_ptr->begin() + i);
-					break;
+					std::vector<Node::JSON_KVP>* temp_object_vector_ptr = std::get_if<std::vector<Node::JSON_KVP>>(&(*temp_node_ptr)->m_kvp);
+					if (temp_object_vector_ptr != nullptr)
+					{
+						for (int i = 0; i < temp_object_vector_ptr->size(); i++)
+						{
+							Node::JSON_KVP current_object = (*temp_object_vector_ptr)[i];
+							if (format_value(current_object.m_key) == t_key)
+							{
+								temp_object_vector_ptr->erase(temp_object_vector_ptr->begin() + i);
+								break;
+							}
+						}
+					}
 				}
 			}
 		}
 
 		// Helper functions for serialize()
-		static std::string convert_to_text(int t_input_integer)
+		static std::string convert_to_text(int t_input_integer) // TODO: Remove conversions for primitives
 		{
-			std::string return_string = std::to_string(t_input_integer);
+			return std::to_string(t_input_integer);
 		}
 		static std::string convert_to_text(double t_input_double)
 		{
-			std::string return_string = std::to_string(t_input_double);
+			return std::to_string(t_input_double);
 		}
 		static std::string convert_to_text(bool t_input_bool)
 		{
-			std::string return_string = std::to_string(t_input_bool);
+			return std::to_string(t_input_bool);
 		}
-		static std::string convert_to_text(std::vector<Node::JSON_Value> t_input_array)
+		static std::string convert_to_text(const std::vector<Node::JSON_Value>& t_input_array)
 		{
 			std::stringstream output;
-			output << "[";
+			output << "[ ";
 
 			for (int i = 0; i < t_input_array.size(); i++)
 			{
-				Node::JSON_Value current_value = t_input_array[i];
-
-				std::string converted_value = std::visit([](auto&& arg) {
-					using T = std::decay_t<decltype(arg)>;
-					if constexpr (std::is_same_v<T, int>)
-						return std::to_string(arg);
-					else if constexpr (std::is_same_v<T, double>)
-						return std::to_string(arg);
-					else if constexpr (std::is_same_v<T, bool>)
-						return std::to_string(arg);
-					else if constexpr (std::is_same_v<T, std::string>)
-						return arg;
-					}, current_value.m_value_individual);
-
+				Node::JSON_Value current_index = t_input_array[i];
+				std::string converted_value = "";
+				//determine type and convert to string
+				if (std::holds_alternative<int>(current_index.m_value_individual))
+				{
+					converted_value = std::to_string(std::get<int>(current_index.m_value_individual));
+				}
+				else if (std::holds_alternative<double>(current_index.m_value_individual))
+				{
+					converted_value = std::to_string(std::get<double>(current_index.m_value_individual));
+				}
+				else if (std::holds_alternative<bool>(current_index.m_value_individual))
+				{
+					converted_value = std::to_string(std::get<bool>(current_index.m_value_individual));
+				}
+				else if (std::holds_alternative<std::string>(current_index.m_value_individual))
+				{
+					converted_value = std::get<std::string>(current_index.m_value_individual);
+				}
+				// determine whether to end the array
 				if (i + 1 < t_input_array.size())
 				{
 					output << converted_value << ", ";
 				}
 				else
 				{
-					output << converted_value << ']';
+					output << converted_value << ' ]';
 				}
 			}
 			return output.str();
-		}
-		static std::string convert_to_text(std::vector<Node::JSON_KVP> t_input_object_array)
-		{
-
 		}
 
 		/**
 		* Serializes the contents of the curent JSON_List structure and returns an std::string.
 		*/
-		std::string serialize()
+		static std::string serialize(const Node& t_node_object)
 		{
 			std::stringstream output;
-			output << "{ ";
+			output << "{";
+			const std::vector<Node::JSON_KVP>* main_vector_ptr = std::get_if<std::vector<Node::JSON_KVP>>(&t_node_object.m_kvp);
+			if (main_vector_ptr == nullptr)
+			{
+				return "NULL";
+			}
+			// read through KVP vector and insert keys and values into stream
+			// makes recursive calls to serialize when encountering another object
+			for (int i = 0; i < main_vector_ptr->size(); i++)
+			{
+				output << (*main_vector_ptr)[i].m_key;
+				output << " : ";				
 
+				if (std::holds_alternative<std::vector<Node::JSON_Value>>((*main_vector_ptr)[i].m_value))
+				{
+					const Node::JSON_Value* temp_value_ptr = std::get_if<Node::JSON_Value>(&(*main_vector_ptr)[i].m_value);
+					output << convert_to_text(temp_value_ptr);
+				}
+				else if (std::holds_alternative<Node::JSON_Value>((*main_vector_ptr)[i].m_value))
+				{
+					const Node::JSON_Value* temp_value_ptr = std::get_if<Node::JSON_Value>(&(*main_vector_ptr)[i].m_value);
+					if (std::holds_alternative<std::shared_ptr<Node>>(temp_value_ptr->m_value_individual)) // is an object
+					{
+						const std::shared_ptr<Node>* temp_value_individual_ptr = std::get_if<std::shared_ptr<Node>>(&temp_value_ptr->m_value_individual);
+						output << serialize(**temp_value_individual_ptr);
+					}
+					else // is a primitive value
+					{
+						std::string converted_value = "";
+						//determine type and convert to string
+						if (std::holds_alternative<int>(temp_value_ptr->m_value_individual))
+						{
+							converted_value = std::to_string(std::get<int>(temp_value_ptr->m_value_individual));
+						}
+						else if (std::holds_alternative<double>(temp_value_ptr->m_value_individual))
+						{
+							converted_value = std::to_string(std::get<double>(temp_value_ptr->m_value_individual));
+						}
+						else if (std::holds_alternative<bool>(temp_value_ptr->m_value_individual))
+						{
+							converted_value = std::to_string(std::get<bool>(temp_value_ptr->m_value_individual));
+						}
+						else if (std::holds_alternative<std::string>(temp_value_ptr->m_value_individual))
+						{
+							converted_value = std::get<std::string>(temp_value_ptr->m_value_individual);
+						}
+						output << converted_value;
+					}
+				}
+				else // uninitialized variant
+				{
+					return "NULL";
+				}		
+				output << ", ";
+			}
+			return output.str();
+		}
+
+		// there must be a cleaner way to do this - function needs to be able to handle a Node object as well as a JSON_list
+		// object in order to make recursive calls
+		static std::string serialize(const JSON_List& t_main_list)
+		{
+			std::stringstream output;
+			output << "{";
+			const std::vector<Node::JSON_KVP>* main_vector_ptr = std::get_if<std::vector<Node::JSON_KVP>>(&t_main_list.main_list.m_kvp);
+			if (main_vector_ptr == nullptr)
+			{
+				return "NULL";
+			}
+			// read through KVP vector and insert keys and values into stream
+			// makes recursive calls to serialize when encountering another object
+			for (int i = 0; i < main_vector_ptr->size(); i++)
+			{
+				output << (*main_vector_ptr)[i].m_key;
+				output << " : ";
+
+				if (std::holds_alternative<std::vector<Node::JSON_Value>>((*main_vector_ptr)[i].m_value))
+				{
+					const Node::JSON_Value* temp_value_ptr = std::get_if<Node::JSON_Value>(&(*main_vector_ptr)[i].m_value);
+					output << convert_to_text(temp_value_ptr);
+				}
+				else if (std::holds_alternative<Node::JSON_Value>((*main_vector_ptr)[i].m_value))
+				{
+					const Node::JSON_Value* temp_value_ptr = std::get_if<Node::JSON_Value>(&(*main_vector_ptr)[i].m_value);
+					if (std::holds_alternative<std::shared_ptr<Node>>(temp_value_ptr->m_value_individual)) // is an object
+					{
+						const std::shared_ptr<Node>* temp_value_individual_ptr = std::get_if<std::shared_ptr<Node>>(&temp_value_ptr->m_value_individual);
+						output << serialize(**temp_value_individual_ptr);
+					}
+					else // is a primitive value
+					{
+						std::string converted_value = "";
+						//determine type and convert to string
+						if (std::holds_alternative<int>(temp_value_ptr->m_value_individual))
+						{
+							converted_value = std::to_string(std::get<int>(temp_value_ptr->m_value_individual));
+						}
+						else if (std::holds_alternative<double>(temp_value_ptr->m_value_individual))
+						{
+							converted_value = std::to_string(std::get<double>(temp_value_ptr->m_value_individual));
+						}
+						else if (std::holds_alternative<bool>(temp_value_ptr->m_value_individual))
+						{
+							converted_value = std::to_string(std::get<bool>(temp_value_ptr->m_value_individual));
+						}
+						else if (std::holds_alternative<std::string>(temp_value_ptr->m_value_individual))
+						{
+							converted_value = std::get<std::string>(temp_value_ptr->m_value_individual);
+						}
+						output << converted_value;
+					}
+				}
+				else // uninitialized variant
+				{
+					return "NULL";
+				}
+				output << ", ";
+			}
+			return output.str();
 		}
 	};
 }
