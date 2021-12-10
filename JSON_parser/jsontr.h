@@ -444,6 +444,8 @@ namespace cjw
 					}
 					it++;
 				}
+				// format key
+				key = format_value(key);
 				// skip white space in-between blocks
 				while (*it == ' ')
 				{
@@ -603,7 +605,8 @@ namespace cjw
 			// erase trailing spaces if any found
 			if (len_counter > 0)
 			{
-				t_string_input.erase((t_string_input.size() - len_counter), std::string::npos);
+				std::string::iterator it = t_string_input.end() - len_counter;
+				t_string_input.erase(it, t_string_input.end());
 			}
 			return t_string_input;
 		}
@@ -996,14 +999,14 @@ namespace cjw
 		{
 			return std::to_string(t_input_double);
 		}
-		static std::string convert_to_text(bool t_input_bool)
+		/*static std::string convert_to_text(bool t_input_bool)
 		{
 			return std::to_string(t_input_bool);
-		}
+		}*/
 		static std::string convert_to_text(const std::vector<Node::JSON_Value>& t_input_array)
 		{
 			std::stringstream output;
-			output << "[ ";
+			output << "[";
 
 			for (int i = 0; i < t_input_array.size(); i++)
 			{
@@ -1027,13 +1030,51 @@ namespace cjw
 					converted_value = std::get<std::string>(current_index.m_value_individual);
 				}
 				// determine whether to end the array
-				if (i + 1 < t_input_array.size())
+				if (i < (t_input_array.size() - 1))
 				{
 					output << converted_value << ", ";
 				}
 				else
 				{
-					output << converted_value << ' ]';
+					output << converted_value << ']';
+				}
+			}
+			return output.str();
+		}
+		static std::string convert_to_text(const std::shared_ptr<std::vector<Node::JSON_Value>>& t_input_array)
+		{
+			std::stringstream output;
+			output << "[ ";
+			std::vector<Node::JSON_Value> temp_value_vector = *t_input_array;
+			for (int i = 0; i < temp_value_vector.size(); i++)
+			{
+				Node::JSON_Value current_index = temp_value_vector[i];
+				std::string converted_value = "";
+				//determine type and convert to string
+				if (std::holds_alternative<int>(current_index.m_value_individual))
+				{
+					converted_value = std::to_string(std::get<int>(current_index.m_value_individual));
+				}
+				else if (std::holds_alternative<double>(current_index.m_value_individual))
+				{
+					converted_value = std::to_string(std::get<double>(current_index.m_value_individual));
+				}
+				else if (std::holds_alternative<bool>(current_index.m_value_individual))
+				{
+					converted_value = std::to_string(std::get<bool>(current_index.m_value_individual));
+				}
+				else if (std::holds_alternative<std::string>(current_index.m_value_individual))
+				{
+					converted_value = std::get<std::string>(current_index.m_value_individual);
+				}
+				// determine whether to end the array
+				if (i < (temp_value_vector.size() - 1))
+				{
+					output << converted_value << ", ";
+				}
+				else
+				{
+					output << converted_value << ']';
 				}
 			}
 			return output.str();
@@ -1060,8 +1101,8 @@ namespace cjw
 
 				if (std::holds_alternative<std::vector<Node::JSON_Value>>((*main_vector_ptr)[i].m_value))
 				{
-					const Node::JSON_Value* temp_value_ptr = std::get_if<Node::JSON_Value>(&(*main_vector_ptr)[i].m_value);
-					output << convert_to_text(temp_value_ptr);
+					const std::vector<Node::JSON_Value>* temp_value_ptr = std::get_if<std::vector<Node::JSON_Value>>(&(*main_vector_ptr)[i].m_value);
+					output << convert_to_text(*temp_value_ptr);
 				}
 				else if (std::holds_alternative<Node::JSON_Value>((*main_vector_ptr)[i].m_value))
 				{
@@ -1098,7 +1139,14 @@ namespace cjw
 				{
 					return "NULL";
 				}		
-				output << ", ";
+				if (i < (main_vector_ptr->size() - 1))
+				{
+					output << ", ";
+				}
+				else // end of object
+				{
+					output << '}';
+				}
 			}
 			return output.str();
 		}
@@ -1123,8 +1171,8 @@ namespace cjw
 
 				if (std::holds_alternative<std::vector<Node::JSON_Value>>((*main_vector_ptr)[i].m_value))
 				{
-					const Node::JSON_Value* temp_value_ptr = std::get_if<Node::JSON_Value>(&(*main_vector_ptr)[i].m_value);
-					output << convert_to_text(temp_value_ptr);
+					const std::vector<Node::JSON_Value>* temp_value_ptr = std::get_if<std::vector<Node::JSON_Value>>(&(*main_vector_ptr)[i].m_value);
+					output << convert_to_text(*temp_value_ptr);
 				}
 				else if (std::holds_alternative<Node::JSON_Value>((*main_vector_ptr)[i].m_value))
 				{
@@ -1161,7 +1209,14 @@ namespace cjw
 				{
 					return "NULL";
 				}
-				output << ", ";
+				if (i < (main_vector_ptr->size() - 1))
+				{
+					output << ", ";
+				}
+				else // end of object
+				{
+					output << '}';
+				}
 			}
 			return output.str();
 		}
