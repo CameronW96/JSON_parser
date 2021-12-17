@@ -57,8 +57,15 @@ namespace cjw
 				var_t m_value_individual = 0;
 
 			public:
-				// array notation
-				JSON_Value& an(int t_index)
+				/*
+				* Method that returns a reference to the JSON_Value object located at a specific index in an array.
+				* A version of this exists in three classes: JSON_List, JSON_KVP, and JSON_Value. All methods have the
+				* same name to facilitate ease of use by the end user. Calls to an() and dn() can be chained in a similar
+				* manner to using array notation and dot notation when accessing JSON objects in Javascript. This is used
+				* primarily to provide a specific array index to the return, update, or delete methods.
+				* @returns JSON_Value&
+				*/
+				JSON_Value& an(const int t_index)
 				{
 					std::shared_ptr<std::vector<JSON_Value>>* temp_value_array = std::get_if<std::shared_ptr<std::vector<JSON_Value>>>(&m_value_individual);
 					if (temp_value_array == nullptr)
@@ -77,8 +84,15 @@ namespace cjw
 					}
 				}
 
-				// dot notation
-				JSON_KVP& dn(std::string t_key)
+				/*
+				* Method that returns a reference to a JSON_KVP object located inside of a JSON object. A version of this
+				* method exists across three classes: JSON_List, JSON_KVP, and JSON_Value. All methods have the
+				* same name to facilitate ease of use by the end user. Calls to an() and dn() can be chained in a similar
+				* manner to using array notation and dot notation when accessing JSON objects in Javascript. This is used
+				* primarily to provide a specific object to the return, update, or delete methods.
+				* @returns JSON_KVP&
+				*/
+				JSON_KVP& dn(const std::string t_key)
 				{
 					// get pointer to m_value_individual
 					std::shared_ptr<Node>* temp_node = std::get_if<std::shared_ptr<Node>>(&m_value_individual);
@@ -94,7 +108,8 @@ namespace cjw
 			};
 			/*
 			* Class that represents the Key-Value pair structure.
-			* If the value is a vector of JSON_Values then it is representing an array.
+			* m_value can be either an individual object or a vector of objects. In the former case m_value holds either
+			* a primitive type or a pointer to a heap allocated Node object. In the latter case m_value represents an array.
 			*/
 			class JSON_KVP
 			{
@@ -103,7 +118,7 @@ namespace cjw
 				std::variant<JSON_Value, std::vector<JSON_Value>> m_value;
 
 			public:
-				static JSON_KVP make_kvp(const std::string& t_key, const JSON_Value& t_value)
+				const static JSON_KVP make_kvp(const std::string& t_key, const JSON_Value& t_value) noexcept
 				{
 					JSON_KVP temp_kvp;
 					temp_kvp.m_key = t_key;
@@ -111,7 +126,7 @@ namespace cjw
 					return temp_kvp;
 				}
 
-				static JSON_KVP make_kvp_array(const std::string &t_key, const std::vector<JSON_Value>& t_value)
+				const static JSON_KVP make_kvp_array(const std::string &t_key, const std::vector<JSON_Value>& t_value) noexcept
 				{
 					JSON_KVP temp_kvp;
 					temp_kvp.m_key = t_key;
@@ -119,7 +134,7 @@ namespace cjw
 					return temp_kvp;
 				}
 
-				static JSON_KVP make_error_kvp() // do not call this except to create a kvp used for 'key not found' errors
+				const static JSON_KVP make_error_kvp() noexcept // do not call this except to create a kvp used for 'key not found' errors
 				{
 					std::string key = "NULL";
 					JSON_Value value;
@@ -127,10 +142,13 @@ namespace cjw
 					return make_kvp(key, value);
 				}
 
-				// ****NODE ACCESS****
-
 				/*
-				* 
+				* Method that returns a reference to the JSON_Value object located at a specific index in an array.
+				* A version of this exists in three classes: JSON_List, JSON_KVP, and JSON_Value. All methods have the
+				* same name to facilitate ease of use by the end user. Calls to an() and dn() can be chained in a similar
+				* manner to using array notation and dot notation when accessing JSON objects in Javascript. This is used
+				* primarily to provide a specific array index to the return, update, or delete methods.
+				* @returns JSON_Value&
 				*/
 				JSON_Value& an(const int t_index)
 				{
@@ -150,7 +168,14 @@ namespace cjw
 					}
 				}
 
-				// dot notation
+				/*
+				* Method that returns a reference to a JSON_KVP object located inside of a JSON object. A version of this
+				* method exists across three classes: JSON_List, JSON_KVP, and JSON_Value. All methods have the
+				* same name to facilitate ease of use by the end user. Calls to an() and dn() can be chained in a similar
+				* manner to using array notation and dot notation when accessing JSON objects in Javascript. This is used
+				* primarily to provide a specific object to the return, update, or delete methods.
+				* @returns JSON_KVP&
+				*/
 				JSON_KVP& dn(const std::string& t_key)
 				{
 					// get pointer to m_value
@@ -246,68 +271,68 @@ namespace cjw
 		public:
 			// **** VALUE SETTERS ****
 
-			void init(const std::string &t_key, const JSON_Value &t_value)
-			{
-				JSON_KVP init_kvp;
-				init_kvp.m_key = t_key;
-				init_kvp.m_value = t_value;
+			//void init(const std::string &t_key, const JSON_Value &t_value)
+			//{
+			//	JSON_KVP init_kvp;
+			//	init_kvp.m_key = t_key;
+			//	init_kvp.m_value = t_value;
 
-				m_kvp = init_kvp;
-			}
-			void init_int (const std::string &t_key, const int &t_value)
-			{
-				JSON_Value init_value;
-				init_value.m_value_individual = t_value;
+			//	m_kvp = init_kvp;
+			//}
+			//void init_int (const std::string &t_key, const int &t_value)
+			//{
+			//	JSON_Value init_value;
+			//	init_value.m_value_individual = t_value;
 
-				init(t_key, init_value);
-			}
-			void init_bool (const std::string &t_key, const bool &t_value)
-			{
-				JSON_Value init_value;
-				init_value.m_value_individual = t_value;
+			//	init(t_key, init_value);
+			//}
+			//void init_bool (const std::string &t_key, const bool &t_value)
+			//{
+			//	JSON_Value init_value;
+			//	init_value.m_value_individual = t_value;
 
-				init(t_key, init_value);
-			}
-			void init_double (const std::string &t_key, const double &t_value)
-			{
-				JSON_Value init_value;
-				init_value.m_value_individual = t_value;
+			//	init(t_key, init_value);
+			//}
+			//void init_double (const std::string &t_key, const double &t_value)
+			//{
+			//	JSON_Value init_value;
+			//	init_value.m_value_individual = t_value;
 
-				init(t_key, init_value);
-			}
-			void init_string (const std::string &t_key, const std::string &t_value)
-			{
-				JSON_Value init_value;
-				init_value.m_value_individual = t_value;
+			//	init(t_key, init_value);
+			//}
+			//void init_string (const std::string &t_key, const std::string &t_value)
+			//{
+			//	JSON_Value init_value;
+			//	init_value.m_value_individual = t_value;
 
-				init(t_key, init_value);
-			}
-			void init_object (const std::string &t_key, const Node* &t_value) // use with unique_ptr
-			{
-				JSON_Value init_value;
-				init_value.m_value_individual = std::move(t_value);
+			//	init(t_key, init_value);
+			//}
+			//void init_object (const std::string &t_key, const Node* &t_value) // use with unique_ptr
+			//{
+			//	JSON_Value init_value;
+			//	init_value.m_value_individual = std::move(t_value);
 
-				init(t_key, init_value);
-			}
+			//	init(t_key, init_value);
+			//}
 
 			// **** STATE SETTERS ****
 
 			// declares that this node contains an array and initializes the value as empty array
 			// array must be populated with array_push_*type
-			void init_array (const std::string& t_key)
+			/*void init_array (const std::string& t_key)
 			{
 				JSON_KVP* temp_ptr = std::get_if<JSON_KVP>(&m_kvp);
 				std::vector<JSON_Value> init_vector;
 				temp_ptr->m_value = init_vector;
-			}
+			}*/
 			// declares that this node contains an object and initializes the node with an empty object  TODO: Update this documentation
 			// object must be populated with object_push
-			void init_object (const std::string& t_key, const std::vector<JSON_KVP>& t_value_object)
+			/*void init_object (const std::string& t_key, const std::vector<JSON_KVP>& t_value_object)
 			{
 				m_is_object = true;
 				m_object_key = t_key;
 				m_kvp = t_value_object;
-			}
+			}*/
 
 		};
 
