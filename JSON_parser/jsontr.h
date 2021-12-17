@@ -31,6 +31,7 @@ constexpr auto ARRAY_ERR_INDEX = "ARRAY ERR: OUT OF BOUNDS INDEX";
 constexpr auto OBJECT_ERR = "OBJECT ERR: PATH DOES NOT CONTAIN OBJECT";
 constexpr auto UNEXPECTED_TYPE_ERR = "TYPE ERR: TYPE CONTAINED DOES NOT MATCH TYPE REQUESTETD";
 constexpr auto RETURN_TYPE_ERR = "TYPE ERR: CANNOT RETURN NON-PRIMITIVE TYPE";
+constexpr auto NOT_FOUND_ERR = "KEY NOT FOUND";
 
 namespace cjw
 {
@@ -42,7 +43,12 @@ namespace cjw
 		{
 			friend class JSON_List;
 		private:
-			class JSON_KVP; // forward declare
+			class JSON_KVP; // forward declaration
+			/*
+			* Class that contains a variant to serve as a typesafe union.
+			* Contains two methods to support array notation and dot notation syntax when accessing a JSON_List.
+			* Exists to allow multi-type array's and JSON objects.
+			*/
 			class JSON_Value
 			{ // TODO: Refactor to use std::unique_ptr
 				// TODO: Remove Node*
@@ -51,8 +57,6 @@ namespace cjw
 				var_t m_value_individual = 0;
 
 			public:
-				// ****NODE ACCESS****
-
 				// array notation
 				JSON_Value& a_n(int t_index)
 				{
@@ -80,25 +84,27 @@ namespace cjw
 					std::shared_ptr<Node>* temp_node = std::get_if<std::shared_ptr<Node>>(&m_value_individual);
 					if (temp_node == nullptr)
 					{
-						throw OBJECT_ERR;
+						throw;
 					}
 
 					JSON_KVP& temp_kvp = (*temp_node)->find_by_key(t_key);
+
 					return temp_kvp;
 				}
 			};
-
+			/*
+			* Class that represents the Key-Value pair structure.
+			* If the value is a vector of JSON_Values then it is representing an array.
+			*/
 			class JSON_KVP
 			{
 			public:
-				bool m_is_array = false;
+				//bool m_is_array = false;
 				std::string m_key;
 				std::variant<JSON_Value, std::vector<JSON_Value>> m_value;
 
 			public:
-
-			public:
-				static JSON_KVP make_kvp(std::string t_key, JSON_Value t_value)
+				static JSON_KVP make_kvp(const std::string& t_key, const JSON_Value& t_value)
 				{
 					JSON_KVP temp_kvp;
 					temp_kvp.m_key = t_key;
@@ -106,18 +112,26 @@ namespace cjw
 					return temp_kvp;
 				}
 
-				static JSON_KVP make_kvp_array(std::string t_key, std::vector<JSON_Value> t_value)
+				static JSON_KVP make_kvp_array(const std::string &t_key, const std::vector<JSON_Value>& t_value)
 				{
 					JSON_KVP temp_kvp;
 					temp_kvp.m_key = t_key;
 					temp_kvp.m_value = t_value;
 					return temp_kvp;
+				}
+
+				static JSON_KVP make_error_kvp() // do not call this except to create a kvp used for not found errors
+				{
+					std::string key = "NULL";
+					JSON_Value value;
+					value.m_value_individual= -111;
+					return make_kvp(key, value);
 				}
 
 				// ****NODE ACCESS****
 
 				// array notation
-				JSON_Value& a_n(int t_index)
+				JSON_Value& a_n(const int t_index)
 				{
 					std::vector<JSON_Value>* temp_value_array = std::get_if<std::vector<JSON_Value>>(&m_value);
 					if (temp_value_array == nullptr)
@@ -136,19 +150,19 @@ namespace cjw
 				}
 
 				// dot notation
-				JSON_KVP& d_n(std::string t_key)
+				JSON_KVP& d_n(const std::string& t_key)
 				{
 					// get pointer to m_value
 					JSON_Value* temp_value = std::get_if<JSON_Value>(&m_value);
 					if (temp_value == nullptr)
 					{
-						throw OBJECT_ERR;
+						throw;
 					}
 					// get pointer to m_value_individual - stored in m_value
 					std::shared_ptr<Node>* temp_node = std::get_if<std::shared_ptr<Node>>(&temp_value->m_value_individual);
 					if (temp_node == nullptr)
 					{
-						throw OBJECT_ERR;
+						throw;
 					}
 
 					JSON_KVP& temp_kvp = (*temp_node)->find_by_key(t_key);
@@ -162,14 +176,15 @@ namespace cjw
 			bool m_is_object = false;
 			std::string m_object_key;
 			std::variant<JSON_KVP, std::vector<JSON_KVP>> m_kvp;
+			JSON_KVP error_kvp = JSON_KVP::make_error_kvp();
 
 		private:
-			JSON_KVP& find_by_key(std::string t_key)
+			JSON_KVP& find_by_key(const std::string& t_key)
 			{
 				std::vector<Node::JSON_KVP>* temp_kvp_array = std::get_if<std::vector<Node::JSON_KVP>>(&m_kvp);
 				if (temp_kvp_array == nullptr)
 				{
-					throw ARRAY_ERR;
+					return error_kvp;
 				}
 				else
 				{
@@ -181,10 +196,11 @@ namespace cjw
 							return temp_kvp;
 						}
 					}
+					return error_kvp;
 				}
 			}
 
-			std::pair<std::vector<Node::JSON_KVP>*, int> recursive_find_parent_vector_and_index(std::string t_key, int t_function_level = 0) // Can't think of any creative names
+			std::pair<std::vector<Node::JSON_KVP>*, int> recursive_find_parent_vector_and_index(const std::string& t_key, const int t_function_level = 0) // Can't think of any creative names
 			{
 				std::vector<Node::JSON_KVP>* temp_kvp_array = std::get_if<std::vector<Node::JSON_KVP>>(&m_kvp);
 				std::pair<std::vector<Node::JSON_KVP>*, int> return_value;
@@ -277,16 +293,15 @@ namespace cjw
 
 			// declares that this node contains an array and initializes the value as empty array
 			// array must be populated with array_push_*type
-			void init_array (const std::string &t_key)
+			void init_array (const std::string& t_key)
 			{
 				JSON_KVP* temp_ptr = std::get_if<JSON_KVP>(&m_kvp);
-				temp_ptr->m_is_array = true;
 				std::vector<JSON_Value> init_vector;
 				temp_ptr->m_value = init_vector;
 			}
 			// declares that this node contains an object and initializes the node with an empty object  TODO: Update this documentation
 			// object must be populated with object_push
-			void init_object (const std::string &t_key, std::vector<JSON_KVP> t_value_object)
+			void init_object (const std::string& t_key, const std::vector<JSON_KVP>& t_value_object)
 			{
 				m_is_object = true;
 				m_object_key = t_key;
@@ -298,8 +313,15 @@ namespace cjw
 	private:
 		Node main_list;
 	private:
-		// return integer indicating the type held in the string argument
-		// 0 = NAN, 1 = INTEGER, 2 = DOUBLE
+
+		//*************************************** STATIC HELPER FUNCTIONS ***************************************\\
+
+		/* 
+		* Checks if a string represents an integer, double, or neither.
+		* @param t_string_input String to be evaluated
+		* @returns Int indicating the type held in the string argument
+		* 0 = NAN, 1 = INTEGER, 2 = DOUBLE
+		*/
 		static int is_number(std::string t_string_input)
 		{
 			// remove whitespace from string
@@ -339,7 +361,7 @@ namespace cjw
 		/**
 		* Determines type from string input.
 		* @param t_string_input Input string to be evaluated.
-		* @returns Integer indindicating the type held in the string argument:
+		* @returns Int indindicating the type held in the string argument:
 		* 0 = NULL/SYNTAX ERROR, 1 = INTEGER, 2 = DOUBLE, 3 = BOOL, 4 = STRING, 5 = NODE, 6 = ARRAY
 		*/
 		static int check_type(std::string t_string_input)
@@ -366,14 +388,24 @@ namespace cjw
 			}
 		}
 
-		static double convert_to_double(std::string t_integer_string)
+		/*
+		* Formats and converts a string to a double
+		* @param t_double_string String representing a double. May contain whitespace.
+		* @returns A double
+		*/
+		static double convert_to_double(std::string t_double_string)
 		{
 			// remove whitespace
-			t_integer_string.erase(std::remove_if(t_integer_string.begin(), t_integer_string.end(), ::isspace), t_integer_string.end());
+			t_double_string.erase(std::remove_if(t_double_string.begin(), t_double_string.end(), ::isspace), t_double_string.end());
 
-			return std::stod(t_integer_string);
+			return std::stod(t_double_string);
 		}
 
+		/*
+		* Formats and converts a string to an int
+		* @param t_integer_string String representing an int. May contain whitespace.
+		* @returns An int
+		*/
 		static int convert_to_int(std::string t_integer_string)
 		{
 			// remove whitespace
@@ -383,14 +415,165 @@ namespace cjw
 		}
 
 		/**
+		* Removes leading and trailing white spaces from input.
+		* @param t_string_input String to be formatted
+		* @returns std::string
+		*/
+		static std::string format_value(std::string t_string_input)
+		{
+			int len_counter = 0;
+			// count leading spaces if any
+			while (t_string_input[len_counter] == ' ')
+			{
+				len_counter++;
+			}
+			// erase leading spaces if any found
+			if (len_counter > 0)
+			{
+				t_string_input.erase(0, len_counter);
+			}
+			// count trailing spaces if any
+			len_counter = 0;
+			for (int i = t_string_input.size() - 1; i > -1; i--)
+			{
+				if (t_string_input[i] == ' ')
+				{
+					len_counter++;
+				}
+				else
+				{
+					break;
+				}
+			}
+			// erase trailing spaces if any found
+			if (len_counter > 0)
+			{
+				std::string::iterator it = t_string_input.end() - len_counter;
+				t_string_input.erase(it, t_string_input.end());
+			}
+			return t_string_input;
+		}
+
+		/**
+		* Removes quotation marks from the first and last position in a string.
+		* @param t_string_input String to be edited.
+		* @attention Assumes no leading or trailing whitespace. Format with format_value()
+		* first if needed.
+		* @see format_value()
+		*/
+		static std::string remove_quotes(std::string t_string_input)
+		{
+			if (t_string_input[0] == '"')
+			{
+				t_string_input.erase(0, 1);
+			}
+
+			if (t_string_input[t_string_input.size()] == '"')
+			{
+				t_string_input.erase(t_string_input.size(), 1);
+			}
+			return t_string_input;
+		}
+
+		static std::string convert_to_text(int t_input_integer) // TODO: Remove conversions for primitives
+		{
+			return std::to_string(t_input_integer);
+		}
+		static std::string convert_to_text(double t_input_double)
+		{
+			return std::to_string(t_input_double);
+		}
+		/*static std::string convert_to_text(bool t_input_bool)
+		{
+			return std::to_string(t_input_bool);
+		}*/
+		static std::string convert_to_text(const std::vector<Node::JSON_Value>& t_input_array)
+		{
+			std::stringstream output;
+			output << "[";
+
+			for (int i = 0; i < t_input_array.size(); i++)
+			{
+				Node::JSON_Value current_index = t_input_array[i];
+				std::string converted_value = "";
+				//determine type and convert to string
+				if (std::holds_alternative<int>(current_index.m_value_individual))
+				{
+					converted_value = std::to_string(std::get<int>(current_index.m_value_individual));
+				}
+				else if (std::holds_alternative<double>(current_index.m_value_individual))
+				{
+					converted_value = std::to_string(std::get<double>(current_index.m_value_individual));
+				}
+				else if (std::holds_alternative<bool>(current_index.m_value_individual))
+				{
+					converted_value = std::to_string(std::get<bool>(current_index.m_value_individual));
+				}
+				else if (std::holds_alternative<std::string>(current_index.m_value_individual))
+				{
+					converted_value = std::get<std::string>(current_index.m_value_individual);
+				}
+				// determine whether to end the array
+				if (i < (t_input_array.size() - 1))
+				{
+					output << converted_value << ", ";
+				}
+				else
+				{
+					output << converted_value << ']';
+				}
+			}
+			return output.str();
+		}
+		static std::string convert_to_text(const std::shared_ptr<std::vector<Node::JSON_Value>>& t_input_array)
+		{
+			std::stringstream output;
+			output << "[ ";
+			std::vector<Node::JSON_Value> temp_value_vector = *t_input_array;
+			for (int i = 0; i < temp_value_vector.size(); i++)
+			{
+				Node::JSON_Value current_index = temp_value_vector[i];
+				std::string converted_value = "";
+				//determine type and convert to string
+				if (std::holds_alternative<int>(current_index.m_value_individual))
+				{
+					converted_value = std::to_string(std::get<int>(current_index.m_value_individual));
+				}
+				else if (std::holds_alternative<double>(current_index.m_value_individual))
+				{
+					converted_value = std::to_string(std::get<double>(current_index.m_value_individual));
+				}
+				else if (std::holds_alternative<bool>(current_index.m_value_individual))
+				{
+					converted_value = std::to_string(std::get<bool>(current_index.m_value_individual));
+				}
+				else if (std::holds_alternative<std::string>(current_index.m_value_individual))
+				{
+					converted_value = std::get<std::string>(current_index.m_value_individual);
+				}
+				// determine whether to end the array
+				if (i < (temp_value_vector.size() - 1))
+				{
+					output << converted_value << ", ";
+				}
+				else
+				{
+					output << converted_value << ']';
+				}
+			}
+			return output.str();
+		}
+
+		//************************************************ CREATE ***********************************************\\
+
+		/**
 		* Parses a JSON object from a std::string.
-		* This function heap allocates a new node and returns a shared_ptr as a Node object is
-		* self referential and can only hold a pointer to itself. Due to the dynamic nature of the
-		* JSON structure, smart pointers are preferable over RAII in this instance. This function also 
-		* calls get_value() which will result in a recursive loop if the value is another object.
-		* The loop is resolved when it reaches that last node in the tree structure.
+		* This is the entry point to a recursive loop that will traverse a JSON object of unknown size and structure
+		* while populating a vector of JSON_KVP objects that mirrors the original structure. Calls get_value()
+		* which will then return a primitive, call read_array(), or make a recursive call to read_object().
+		* Note that read_array also calls get_value() if the array contains an object.
 		* @param t_object_input The object value to be parsed.
-		* @returns A shared pointer to a heap allocated Node object.
+		* @returns A vector of JSON_KVP objects which is the basis for the JSON_List object.
 		* @see get_value()
 		*/
 		static std::vector<Node::JSON_KVP> read_object(std::string t_object_input)
@@ -515,6 +698,12 @@ namespace cjw
 			return temp_kvp_array;
 		}
 
+		/*
+		* Parses an array represesnted in a string.
+		* Like read_object() this is part of a recursive loop containing read_object(), read_array(), and get_value.
+		* @param t_array_input String to be parsed.
+		* @returns A vector of JSON_Value objects which is how this library represents an array.
+		*/
 		static std::vector<Node::JSON_Value> read_array(std::string t_array_input)
 		{
 			std::string::iterator it = t_array_input.begin();
@@ -569,67 +758,6 @@ namespace cjw
 				}
 			}
 			return temp_value_array;
-		}
-
-		/**
-		* Removes leading and trailing white spaces from input.
-		* @param t_string_input String to be formatted
-		* @returns std::string
-		*/
-		static std::string format_value(std::string t_string_input)
-		{
-			int len_counter = 0;
-			// count leading spaces if any
-			while (t_string_input[len_counter] == ' ')
-			{
-				len_counter++;
-			}
-			// erase leading spaces if any found
-			if (len_counter > 0)
-			{
-				t_string_input.erase(0, len_counter);
-			}
-			// count trailing spaces if any
-			len_counter = 0;
-			for (int i = t_string_input.size() - 1; i > -1; i--)
-			{
-				if (t_string_input[i] == ' ')
-				{
-					len_counter++;
-				}
-				else
-				{
-					break;
-				}
-			}
-			// erase trailing spaces if any found
-			if (len_counter > 0)
-			{
-				std::string::iterator it = t_string_input.end() - len_counter;
-				t_string_input.erase(it, t_string_input.end());
-			}
-			return t_string_input;
-		}
-
-		/**
-		* Removes quotation marks from the first and last position in a string.
-		* @param t_string_input String to be edited.
-		* @attention Assumes no leading or trailing whitespace. Format with format_value()
-		* first if needed.
-		* @see format_value()
-		*/
-		static std::string remove_quotes(std::string t_string_input)
-		{
-			if (t_string_input[0] == '"')
-			{
-				t_string_input.erase(0, 1);
-			}
-
-			if (t_string_input[t_string_input.size()] == '"')
-			{
-				t_string_input.erase(t_string_input.size(), 1);
-			}
-			return t_string_input;
 		}
 
 		/**
@@ -712,11 +840,9 @@ namespace cjw
 
 	public:
 		/**
-		* Parses c-string style input using recursion to traverse the JSON_List structure.
+		* Parses string input using recursion to traverse a text JSON object and populate the JSON_List structure.
 		* @param t_json_input JSON formatted text input.
-		* @returns A JSON_List object that can be used to initialize another JSON_List object.
-		* @warning If your JSON object is held in a char[] buffer
-		* it must first be converted to std::string.
+		* @returns A JSON_List object
 		* @see get_value(), read_array(), read_object()
 		*/
 		static JSON_List parse(std::string t_json_input)
@@ -726,6 +852,11 @@ namespace cjw
 			return temp_list;			
 		}
 
+		/*
+		* Reads a file into a string and removes all newlines and carriage returns.
+		* @param t_file_path File path including file name and extension
+		* @returns std::string
+		*/
 		static std::string read_file(std::string t_file_path)
 		{
 			std::ifstream json_file;
@@ -745,19 +876,21 @@ namespace cjw
 			return output_string;
 		}
 
+		//************************************************ READ ************************************************\\
+
 		static int r_int(const Node::JSON_Value& t_input)
 		{
-			int r_int = 0;
+			int output = 0;
 			if (std::holds_alternative<int>(t_input.m_value_individual))
 			{
-				r_int = std::get<int>(t_input.m_value_individual);
+				output = std::get<int>(t_input.m_value_individual);
 			}
-			return r_int;
+			return output;
 		}
-
 		static int r_int(const Node::JSON_KVP& t_input)
 		{
-			int r_int = 0;
+			if (t_input.m_key == "NULL") { return -1; } // check for object not found
+			int output = 0;
 			const Node::JSON_Value* temp_value = std::get_if<Node::JSON_Value>(&t_input.m_value);
 			if (temp_value == nullptr)
 			{
@@ -767,29 +900,28 @@ namespace cjw
 			{
 				if (std::holds_alternative<int>(temp_value->m_value_individual))
 				{
-					r_int = std::get<int>(temp_value->m_value_individual);
+					output = std::get<int>(temp_value->m_value_individual);
 				}
 				else
 				{
 					throw UNEXPECTED_TYPE_ERR;
 				}
 			}
-			return r_int;
+			return output;
 		}
-
 		static double r_double(const Node::JSON_Value& t_input)
 		{
-			double r_double = 0;
+			double output = 0;
 			if (std::holds_alternative<double>(t_input.m_value_individual))
 			{
-				r_double = std::get<double>(t_input.m_value_individual);
+				output = std::get<double>(t_input.m_value_individual);
 			}
-			return r_double;
+			return output;
 		}
-
 		static double r_double(const Node::JSON_KVP& t_input)
 		{
-			double r_double = 0;
+			if (t_input.m_key == "NULL") { return -1; } // check for object not found
+			double output = 0;
 			const Node::JSON_Value* temp_value = std::get_if<Node::JSON_Value>(&t_input.m_value);
 			if (temp_value == nullptr)
 			{
@@ -799,7 +931,7 @@ namespace cjw
 			{
 				if (std::holds_alternative<double>(temp_value->m_value_individual))
 				{
-					r_double = std::get<double>(temp_value->m_value_individual);
+					output = std::get<double>(temp_value->m_value_individual);
 				}
 				else
 				{
@@ -807,22 +939,21 @@ namespace cjw
 				}
 			}
 
-			return r_double;
+			return output;
 		}
-
 		static bool r_bool(const Node::JSON_Value& t_input)
 		{
-			bool r_bool = false;
+			bool output = false;
 			if (std::holds_alternative<bool>(t_input.m_value_individual))
 			{
-				r_bool = std::get<bool>(t_input.m_value_individual);
+				output = std::get<bool>(t_input.m_value_individual);
 			}
-			return r_bool;
+			return output;
 		}
-
 		static bool r_bool(const Node::JSON_KVP& t_input)
 		{
-			bool r_bool = false;
+			if (t_input.m_key == "NULL") { return 0; } // check for object not found
+			bool output = false;
 			const Node::JSON_Value* temp_value = std::get_if<Node::JSON_Value>(&t_input.m_value);
 			if (temp_value == nullptr)
 			{
@@ -832,7 +963,7 @@ namespace cjw
 			{
 				if (std::holds_alternative<bool>(temp_value->m_value_individual))
 				{
-					r_bool = std::get<bool>(temp_value->m_value_individual);
+					output = std::get<bool>(temp_value->m_value_individual);
 				}
 				else
 				{
@@ -840,31 +971,30 @@ namespace cjw
 				}
 			}
 
-			return r_bool;
+			return output;
 		}
-
 		static std::string r_string(const Node::JSON_Value& t_input)
 		{
-			std::string r_string = "";
+			std::string output = "";
 			if (std::holds_alternative<std::string>(t_input.m_value_individual))
 			{
-				r_string = std::get<std::string>(t_input.m_value_individual);
+				output = std::get<std::string>(t_input.m_value_individual);
 			}
-			return r_string;
+			return output;
 		}
-
 		static std::string r_string(const Node::JSON_KVP& t_input)
 		{
-			std::string r_string = "";
+			if (t_input.m_key == "NULL") { return "NULL"; } // check for object not found
+			std::string output = "";
 			const Node::JSON_Value* temp_value = std::get_if<Node::JSON_Value>(&t_input.m_value);
 			if (temp_value != nullptr)			
 			{
 				if (std::holds_alternative<std::string>(temp_value->m_value_individual))
 				{
-					r_string = std::get<std::string>(temp_value->m_value_individual);
+					output = std::get<std::string>(temp_value->m_value_individual);
 				}
 			}
-			return r_string;
+			return output;
 		}
 
 		// ****NODE ACCESS****
@@ -894,7 +1024,7 @@ namespace cjw
 			return main_list.find_by_key(t_key);
 		}
 
-		// ****UPDATE FUNCTIONS****
+		//************************************************ UPDATE ***********************************************\\
 
 		void static update_key(std::string t_new_key, Node::JSON_KVP& t_object)
 		{
@@ -937,7 +1067,8 @@ namespace cjw
 			t_value.m_value_individual = t_new_value;
 		}
 
-		// ****DELETE FUNCTIONS****
+		//************************************************ DELETE ***********************************************\\
+
 		void remove_first_found(std::string t_key)
 		{
 			std::pair<std::vector<Node::JSON_KVP>*, int> vector_reference_and_index = main_list.recursive_find_parent_vector_and_index(t_key);
@@ -990,98 +1121,13 @@ namespace cjw
 			}
 		}
 
-		// Helper functions for serialize()
-		static std::string convert_to_text(int t_input_integer) // TODO: Remove conversions for primitives
-		{
-			return std::to_string(t_input_integer);
-		}
-		static std::string convert_to_text(double t_input_double)
-		{
-			return std::to_string(t_input_double);
-		}
-		/*static std::string convert_to_text(bool t_input_bool)
-		{
-			return std::to_string(t_input_bool);
-		}*/
-		static std::string convert_to_text(const std::vector<Node::JSON_Value>& t_input_array)
-		{
-			std::stringstream output;
-			output << "[";
-
-			for (int i = 0; i < t_input_array.size(); i++)
-			{
-				Node::JSON_Value current_index = t_input_array[i];
-				std::string converted_value = "";
-				//determine type and convert to string
-				if (std::holds_alternative<int>(current_index.m_value_individual))
-				{
-					converted_value = std::to_string(std::get<int>(current_index.m_value_individual));
-				}
-				else if (std::holds_alternative<double>(current_index.m_value_individual))
-				{
-					converted_value = std::to_string(std::get<double>(current_index.m_value_individual));
-				}
-				else if (std::holds_alternative<bool>(current_index.m_value_individual))
-				{
-					converted_value = std::to_string(std::get<bool>(current_index.m_value_individual));
-				}
-				else if (std::holds_alternative<std::string>(current_index.m_value_individual))
-				{
-					converted_value = std::get<std::string>(current_index.m_value_individual);
-				}
-				// determine whether to end the array
-				if (i < (t_input_array.size() - 1))
-				{
-					output << converted_value << ", ";
-				}
-				else
-				{
-					output << converted_value << ']';
-				}
-			}
-			return output.str();
-		}
-		static std::string convert_to_text(const std::shared_ptr<std::vector<Node::JSON_Value>>& t_input_array)
-		{
-			std::stringstream output;
-			output << "[ ";
-			std::vector<Node::JSON_Value> temp_value_vector = *t_input_array;
-			for (int i = 0; i < temp_value_vector.size(); i++)
-			{
-				Node::JSON_Value current_index = temp_value_vector[i];
-				std::string converted_value = "";
-				//determine type and convert to string
-				if (std::holds_alternative<int>(current_index.m_value_individual))
-				{
-					converted_value = std::to_string(std::get<int>(current_index.m_value_individual));
-				}
-				else if (std::holds_alternative<double>(current_index.m_value_individual))
-				{
-					converted_value = std::to_string(std::get<double>(current_index.m_value_individual));
-				}
-				else if (std::holds_alternative<bool>(current_index.m_value_individual))
-				{
-					converted_value = std::to_string(std::get<bool>(current_index.m_value_individual));
-				}
-				else if (std::holds_alternative<std::string>(current_index.m_value_individual))
-				{
-					converted_value = std::get<std::string>(current_index.m_value_individual);
-				}
-				// determine whether to end the array
-				if (i < (temp_value_vector.size() - 1))
-				{
-					output << converted_value << ", ";
-				}
-				else
-				{
-					output << converted_value << ']';
-				}
-			}
-			return output.str();
-		}
+		//*********************************************** SERIALIZE *********************************************\\
 
 		/**
-		* Serializes the contents of the curent JSON_List structure and returns an std::string.
+		* Serializes the contents of the curent JSON_List structure.
+		* Will be a "flat packed" JSON object with no newline formatting.
+		* @param t_node_object A nested JSON object within the JSON_List structure.
+		* @returns std::string
 		*/
 		static std::string serialize(const Node& t_node_object)
 		{
