@@ -199,7 +199,6 @@ namespace cjw
 		private:
 			// specifies whether this node is a JSON object
 			// m_value should be initialized to a vector in this case
-			bool m_is_object = false;
 			std::string m_object_key;
 			std::variant<JSON_KVP, std::vector<JSON_KVP>> m_kvp;
 			JSON_KVP error_kvp = JSON_KVP::make_error_kvp();
@@ -271,73 +270,73 @@ namespace cjw
 		public:
 			// **** VALUE SETTERS ****
 
-			//void init(const std::string &t_key, const JSON_Value &t_value)
-			//{
-			//	JSON_KVP init_kvp;
-			//	init_kvp.m_key = t_key;
-			//	init_kvp.m_value = t_value;
+			void init(const std::string &t_key, const JSON_Value &t_value) noexcept
+			{
+				JSON_KVP init_kvp;
+				init_kvp.m_key = t_key;
+				init_kvp.m_value = t_value;
 
-			//	m_kvp = init_kvp;
-			//}
-			//void init_int (const std::string &t_key, const int &t_value)
-			//{
-			//	JSON_Value init_value;
-			//	init_value.m_value_individual = t_value;
+				m_kvp = init_kvp;
+			}
+			void init_int (const std::string &t_key, const int &t_value) noexcept
+			{
+				JSON_Value init_value;
+				init_value.m_value_individual = t_value;
 
-			//	init(t_key, init_value);
-			//}
-			//void init_bool (const std::string &t_key, const bool &t_value)
-			//{
-			//	JSON_Value init_value;
-			//	init_value.m_value_individual = t_value;
+				init(t_key, init_value);
+			}
+			void init_bool (const std::string &t_key, const bool &t_value) noexcept
+			{
+				JSON_Value init_value;
+				init_value.m_value_individual = t_value;
 
-			//	init(t_key, init_value);
-			//}
-			//void init_double (const std::string &t_key, const double &t_value)
-			//{
-			//	JSON_Value init_value;
-			//	init_value.m_value_individual = t_value;
+				init(t_key, init_value);
+			}
+			void init_double (const std::string &t_key, const double &t_value) noexcept
+			{
+				JSON_Value init_value;
+				init_value.m_value_individual = t_value;
 
-			//	init(t_key, init_value);
-			//}
-			//void init_string (const std::string &t_key, const std::string &t_value)
-			//{
-			//	JSON_Value init_value;
-			//	init_value.m_value_individual = t_value;
+				init(t_key, init_value);
+			}
+			void init_string (const std::string &t_key, const std::string &t_value) noexcept
+			{
+				JSON_Value init_value;
+				init_value.m_value_individual = t_value;
 
-			//	init(t_key, init_value);
-			//}
-			//void init_object (const std::string &t_key, const Node* &t_value) // use with unique_ptr
-			//{
-			//	JSON_Value init_value;
-			//	init_value.m_value_individual = std::move(t_value);
+				init(t_key, init_value);
+			}
+			void init_object (const std::string &t_key, const Node* &t_value) noexcept
+			{
+				JSON_Value init_value;
+				init_value.m_value_individual = t_value;
 
-			//	init(t_key, init_value);
-			//}
+				init(t_key, init_value);
+			}
 
 			// **** STATE SETTERS ****
 
 			// declares that this node contains an array and initializes the value as empty array
 			// array must be populated with array_push_*type
-			/*void init_array (const std::string& t_key)
+			void init_array (const std::string& t_key)
 			{
 				JSON_KVP* temp_ptr = std::get_if<JSON_KVP>(&m_kvp);
 				std::vector<JSON_Value> init_vector;
 				temp_ptr->m_value = init_vector;
-			}*/
+			}
 			// declares that this node contains an object and initializes the node with an empty object  TODO: Update this documentation
 			// object must be populated with object_push
-			/*void init_object (const std::string& t_key, const std::vector<JSON_KVP>& t_value_object)
+			void init_object (const std::string& t_key, const std::vector<JSON_KVP>& t_value_object) noexcept
 			{
-				m_is_object = true;
 				m_object_key = t_key;
 				m_kvp = t_value_object;
-			}*/
+			}
 
 		};
 
 	private:
 		Node main_list;
+
 	private:
 
 		//*************************************** STATIC HELPER FUNCTIONS ***************************************\\
@@ -348,7 +347,7 @@ namespace cjw
 		* @returns Int indicating the type held in the string argument
 		* 0 = NAN, 1 = INTEGER, 2 = DOUBLE
 		*/
-		static int is_number(std::string t_string_input)
+		const static int is_number(std::string t_string_input)
 		{
 			// remove whitespace from string
 			t_string_input.erase(std::remove_if(t_string_input.begin(), t_string_input.end(), ::isspace), t_string_input.end());
@@ -390,7 +389,7 @@ namespace cjw
 		* @returns Int indindicating the type held in the string argument:
 		* 0 = NULL/SYNTAX ERROR, 1 = INTEGER, 2 = DOUBLE, 3 = BOOL, 4 = STRING, 5 = NODE, 6 = ARRAY
 		*/
-		static int check_type(std::string t_string_input)
+		const static int check_type(std::string t_string_input) noexcept
 		{
 			if (t_string_input[0] == '"') // check for string
 			{
@@ -419,7 +418,7 @@ namespace cjw
 		* @param t_double_string String representing a double. May contain whitespace.
 		* @returns A double
 		*/
-		static double convert_to_double(std::string t_double_string)
+		const static double convert_to_double(std::string t_double_string)
 		{
 			// remove whitespace
 			t_double_string.erase(std::remove_if(t_double_string.begin(), t_double_string.end(), ::isspace), t_double_string.end());
@@ -432,7 +431,7 @@ namespace cjw
 		* @param t_integer_string String representing an int. May contain whitespace.
 		* @returns An int
 		*/
-		static int convert_to_int(std::string t_integer_string)
+		const static int convert_to_int(std::string t_integer_string)
 		{
 			// remove whitespace
 			t_integer_string.erase(std::remove_if(t_integer_string.begin(), t_integer_string.end(), ::isspace), t_integer_string.end());
@@ -445,7 +444,7 @@ namespace cjw
 		* @param t_string_input String to be formatted
 		* @returns std::string
 		*/
-		static std::string format_value(std::string t_string_input)
+		const static std::string format_value(std::string t_string_input)
 		{
 			int len_counter = 0;
 			// count leading spaces if any
@@ -487,7 +486,7 @@ namespace cjw
 		* first if needed.
 		* @see format_value()
 		*/
-		static std::string remove_quotes(std::string t_string_input)
+		const static std::string remove_quotes(std::string t_string_input)
 		{
 			if (t_string_input[0] == '"')
 			{
@@ -501,19 +500,12 @@ namespace cjw
 			return t_string_input;
 		}
 
-		static std::string convert_to_text(int t_input_integer) // TODO: Remove conversions for primitives
-		{
-			return std::to_string(t_input_integer);
-		}
-		static std::string convert_to_text(double t_input_double)
-		{
-			return std::to_string(t_input_double);
-		}
-		/*static std::string convert_to_text(bool t_input_bool)
-		{
-			return std::to_string(t_input_bool);
-		}*/
-		static std::string convert_to_text(const std::vector<Node::JSON_Value>& t_input_array)
+		/*
+		* Overloaded method that converts an array represented in a JSON_KVP and returns a
+		* "flat packed" JSON array.
+		* @returns std::string
+		*/
+		const static std::string convert_to_text(const std::vector<Node::JSON_Value>& t_input_array)
 		{
 			std::stringstream output;
 			output << "[";
@@ -1025,7 +1017,14 @@ namespace cjw
 
 		// ****NODE ACCESS****
 
-		// array notation
+		/*
+		* Method that returns a reference to the JSON_Value object located at a specific index in an array.
+		* A version of this exists in three classes: JSON_List, JSON_KVP, and JSON_Value. All methods have the
+		* same name to facilitate ease of use by the end user. Calls to an() and dn() can be chained in a similar
+		* manner to using array notation and dot notation when accessing JSON objects in Javascript. This is used
+		* primarily to provide a specific array index to the return, update, or delete methods.
+		* @returns JSON_Value&
+		*/
 		Node::JSON_KVP& an(int t_index)
 		{
 			std::vector<Node::JSON_KVP>* temp_kvp_array = std::get_if<std::vector<Node::JSON_KVP>>(&main_list.m_kvp);
@@ -1044,7 +1043,14 @@ namespace cjw
 			}		
 		}
 
-		// dot notation
+		/*
+		* Method that returns a reference to a JSON_KVP object located inside of a JSON object. A version of this
+		* method exists across three classes: JSON_List, JSON_KVP, and JSON_Value. All methods have the
+		* same name to facilitate ease of use by the end user. Calls to an() and dn() can be chained in a similar
+		* manner to using array notation and dot notation when accessing JSON objects in Javascript. This is used
+		* primarily to provide a specific object to the return, update, or delete methods.
+		* @returns JSON_KVP&
+		*/
 		Node::JSON_KVP& dn(std::string t_key)
 		{
 			return main_list.find_by_key(t_key);
@@ -1052,50 +1058,50 @@ namespace cjw
 
 		//************************************************ UPDATE ***********************************************\\
 
-		void static update_key(std::string t_new_key, Node::JSON_KVP& t_object)
+		void static update_key(const std::string t_new_key, Node::JSON_KVP& t_object) noexcept
 		{
 			t_object.m_key = t_new_key;
 		}
-		void static update_value(int t_new_value, Node::JSON_KVP& t_object)
+		void static update_value(const int t_new_value, Node::JSON_KVP& t_object) noexcept
 		{
 			Node::JSON_Value* value_ptr = std::get_if<Node::JSON_Value>(&t_object.m_value);
 			value_ptr->m_value_individual = t_new_value;
 		}
-		void static update_value(double t_new_value, Node::JSON_KVP& t_object)
+		void static update_value(const double t_new_value, Node::JSON_KVP& t_object) noexcept
 		{
 			Node::JSON_Value* value_ptr = std::get_if<Node::JSON_Value>(&t_object.m_value);
 			value_ptr->m_value_individual = t_new_value;
 		}
-		void static update_value(bool t_new_value, Node::JSON_KVP& t_object)
+		void static update_value(const bool t_new_value, Node::JSON_KVP& t_object) noexcept
 		{
 			Node::JSON_Value* value_ptr = std::get_if<Node::JSON_Value>(&t_object.m_value);
 			value_ptr->m_value_individual = t_new_value;
 		}
-		void static update_value(std::string t_new_value, Node::JSON_KVP& t_object)
+		void static update_value(const std::string t_new_value, Node::JSON_KVP& t_object) noexcept
 		{
 			Node::JSON_Value* value_ptr = std::get_if<Node::JSON_Value>(&t_object.m_value);
 			value_ptr->m_value_individual = t_new_value;
 		}
-		void static update_value(int t_new_value, Node::JSON_Value& t_value)
+		void static update_value(const int t_new_value, Node::JSON_Value& t_value) noexcept
 		{
 			t_value.m_value_individual = t_new_value;
 		}
-		void static update_value(double t_new_value, Node::JSON_Value& t_value)
+		void static update_value(const double t_new_value, Node::JSON_Value& t_value) noexcept
 		{
 			t_value.m_value_individual = t_new_value;
 		}
-		void static update_value(bool t_new_value, Node::JSON_Value& t_value)
+		void static update_value(const bool t_new_value, Node::JSON_Value& t_value) noexcept
 		{
 			t_value.m_value_individual = t_new_value;
 		}
-		void static update_value(std::string t_new_value, Node::JSON_Value& t_value)
+		void static update_value(const std::string t_new_value, Node::JSON_Value& t_value) noexcept
 		{
 			t_value.m_value_individual = t_new_value;
 		}
 
 		//************************************************ DELETE ***********************************************\\
 
-		void remove_first_found(std::string t_key)
+		void remove_first_found(const std::string t_key)
 		{
 			std::pair<std::vector<Node::JSON_KVP>*, int> vector_reference_and_index = main_list.recursive_find_parent_vector_and_index(t_key);
 			if (vector_reference_and_index.first != nullptr)
@@ -1105,7 +1111,7 @@ namespace cjw
 				temp_vector_ptr->erase(temp_vector_ptr->begin() + vector_index);
 			}
 		}
-		void static remove_from_array(Node::JSON_Value& t_array, int t_index)
+		void static remove_from_array(Node::JSON_Value& t_array, const int t_index)
 		{
 			std::shared_ptr<std::vector<Node::JSON_Value>>* temp_array_ptr = std::get_if<std::shared_ptr<std::vector<Node::JSON_Value>>>(&t_array.m_value_individual);
 			if (temp_array_ptr != nullptr)
@@ -1113,7 +1119,7 @@ namespace cjw
 				(*temp_array_ptr)->erase((*temp_array_ptr)->begin() + t_index);
 			}
 		}
-		void static remove_from_array(Node::JSON_KVP& t_object, int t_index)
+		void static remove_from_array(Node::JSON_KVP& t_object, const int t_index)
 
 		{
 			std::vector<Node::JSON_Value>* temp_value_ptr = std::get_if<std::vector<Node::JSON_Value>>(&t_object.m_value);
@@ -1122,7 +1128,7 @@ namespace cjw
 				temp_value_ptr->erase(temp_value_ptr->begin() + t_index);
 			}
 		}
-		void static remove_from_object(Node::JSON_KVP& t_object, std::string t_key)
+		void static remove_from_object(Node::JSON_KVP& t_object, const std::string t_key)
 		{
 			Node::JSON_Value* temp_value_ptr = std::get_if<Node::JSON_Value>(&t_object.m_value);
 			if (temp_value_ptr != nullptr)
@@ -1210,7 +1216,8 @@ namespace cjw
 				else // uninitialized variant
 				{
 					return "NULL";
-				}		
+				}
+
 				if (i < (main_vector_ptr->size() - 1))
 				{
 					output << ", ";
