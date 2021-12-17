@@ -58,7 +58,7 @@ namespace cjw
 
 			public:
 				// array notation
-				JSON_Value& a_n(int t_index)
+				JSON_Value& an(int t_index)
 				{
 					std::shared_ptr<std::vector<JSON_Value>>* temp_value_array = std::get_if<std::shared_ptr<std::vector<JSON_Value>>>(&m_value_individual);
 					if (temp_value_array == nullptr)
@@ -78,7 +78,7 @@ namespace cjw
 				}
 
 				// dot notation
-				JSON_KVP& d_n(std::string t_key)
+				JSON_KVP& dn(std::string t_key)
 				{
 					// get pointer to m_value_individual
 					std::shared_ptr<Node>* temp_node = std::get_if<std::shared_ptr<Node>>(&m_value_individual);
@@ -99,7 +99,6 @@ namespace cjw
 			class JSON_KVP
 			{
 			public:
-				//bool m_is_array = false;
 				std::string m_key;
 				std::variant<JSON_Value, std::vector<JSON_Value>> m_value;
 
@@ -120,7 +119,7 @@ namespace cjw
 					return temp_kvp;
 				}
 
-				static JSON_KVP make_error_kvp() // do not call this except to create a kvp used for not found errors
+				static JSON_KVP make_error_kvp() // do not call this except to create a kvp used for 'key not found' errors
 				{
 					std::string key = "NULL";
 					JSON_Value value;
@@ -130,8 +129,10 @@ namespace cjw
 
 				// ****NODE ACCESS****
 
-				// array notation
-				JSON_Value& a_n(const int t_index)
+				/*
+				* 
+				*/
+				JSON_Value& an(const int t_index)
 				{
 					std::vector<JSON_Value>* temp_value_array = std::get_if<std::vector<JSON_Value>>(&m_value);
 					if (temp_value_array == nullptr)
@@ -150,7 +151,7 @@ namespace cjw
 				}
 
 				// dot notation
-				JSON_KVP& d_n(const std::string& t_key)
+				JSON_KVP& dn(const std::string& t_key)
 				{
 					// get pointer to m_value
 					JSON_Value* temp_value = std::get_if<JSON_Value>(&m_value);
@@ -1000,7 +1001,7 @@ namespace cjw
 		// ****NODE ACCESS****
 
 		// array notation
-		Node::JSON_KVP& a_n(int t_index)
+		Node::JSON_KVP& an(int t_index)
 		{
 			std::vector<Node::JSON_KVP>* temp_kvp_array = std::get_if<std::vector<Node::JSON_KVP>>(&main_list.m_kvp);
 			if (temp_kvp_array == nullptr)
@@ -1019,7 +1020,7 @@ namespace cjw
 		}
 
 		// dot notation
-		Node::JSON_KVP& d_n(std::string t_key)
+		Node::JSON_KVP& dn(std::string t_key)
 		{
 			return main_list.find_by_key(t_key);
 		}
