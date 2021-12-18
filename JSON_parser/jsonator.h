@@ -1,17 +1,17 @@
 /**
-* \mainpage JSONator
-* 
 * Author: Cameron White
 * 
-* This library provides a basic JSON data structure.
+* This library provides a JSON data structure with CRUD capabilities. It supports multi-type arrays and objects while maintaining type safety.
+* C++ 17 is required for variant and type traits.
 * 
-* This is intended for use with raw text input such as the type received from web API requests or json files.
+* More info: https://cameronw96.github.io/JSONator
+* Github repo: https://github.com/CameronW96/JSONator* 
 */
 
 #pragma once
 
-#ifndef jsontr
-#define jsontr
+#ifndef jsonator
+#define jsonator
 
 #include <utility>
 #include <string>
@@ -50,8 +50,7 @@ namespace cjw
 			* Exists to allow multi-type array's and JSON objects.
 			*/
 			class JSON_Value
-			{ // TODO: Refactor to use std::unique_ptr
-				// TODO: Remove Node*
+			{ 
 				using var_t = std::variant<int, bool, double, std::string, std::shared_ptr<Node>, std::shared_ptr<std::vector<JSON_Value>>>;
 			public:
 				var_t m_value_individual = 0;
@@ -197,11 +196,9 @@ namespace cjw
 			};
 
 		private:
-			// specifies whether this node is a JSON object
-			// m_value should be initialized to a vector in this case
 			std::string m_object_key;
 			std::variant<JSON_KVP, std::vector<JSON_KVP>> m_kvp;
-			JSON_KVP error_kvp = JSON_KVP::make_error_kvp();
+			JSON_KVP error_kvp = JSON_KVP::make_error_kvp();	// for not found errors with dn()
 
 		private:
 			JSON_KVP& find_by_key(const std::string& t_key)
@@ -225,7 +222,7 @@ namespace cjw
 				}
 			}
 
-			std::pair<std::vector<Node::JSON_KVP>*, int> recursive_find_parent_vector_and_index(const std::string& t_key, const int t_function_level = 0) // Can't think of any creative names
+			std::pair<std::vector<Node::JSON_KVP>*, int> recursive_find_parent_vector_and_index(const std::string& t_key, const int t_function_level = 0)
 			{
 				std::vector<Node::JSON_KVP>* temp_kvp_array = std::get_if<std::vector<Node::JSON_KVP>>(&m_kvp);
 				std::pair<std::vector<Node::JSON_KVP>*, int> return_value;
@@ -268,8 +265,9 @@ namespace cjw
 			}
 
 		public:
-			// **** VALUE SETTERS ****
-
+			//*************************************** VALUE SETTERS ***************************************\\
+		
+			//Methods used to initialize the Node object with a given type.
 			void init(const std::string &t_key, const JSON_Value &t_value) noexcept
 			{
 				JSON_KVP init_kvp;
@@ -314,18 +312,16 @@ namespace cjw
 				init(t_key, init_value);
 			}
 
-			// **** STATE SETTERS ****
+			//*************************************** STATE SETTERS ***************************************\\
 
 			// declares that this node contains an array and initializes the value as empty array
-			// array must be populated with array_push_*type
 			void init_array (const std::string& t_key)
 			{
 				JSON_KVP* temp_ptr = std::get_if<JSON_KVP>(&m_kvp);
 				std::vector<JSON_Value> init_vector;
 				temp_ptr->m_value = init_vector;
 			}
-			// declares that this node contains an object and initializes the node with an empty object  TODO: Update this documentation
-			// object must be populated with object_push
+			// declares that this node contains an object and initializes the node with an empty object
 			void init_object (const std::string& t_key, const std::vector<JSON_KVP>& t_value_object) noexcept
 			{
 				m_object_key = t_key;
@@ -896,19 +892,29 @@ namespace cjw
 
 		//************************************************ READ ************************************************\\
 
+		/*
+		* Returns an int contained in an array or -1 on error.
+		* @param t_input Array to be evaluated (usually obtained with an())
+		* @returns int
+		*/
 		static int r_int(const Node::JSON_Value& t_input)
 		{
-			int output = 0;
+			int output = -1;
 			if (std::holds_alternative<int>(t_input.m_value_individual))
 			{
 				output = std::get<int>(t_input.m_value_individual);
 			}
 			return output;
 		}
+		/*
+		* Returns an int contained in an object or -1 on error.
+		* @param t_input Object to be evaluated (usually obtained with dn())
+		* @returns int
+		*/
 		static int r_int(const Node::JSON_KVP& t_input)
 		{
 			if (t_input.m_key == "NULL") { return -1; } // check for object not found
-			int output = 0;
+			int output = -1;
 			const Node::JSON_Value* temp_value = std::get_if<Node::JSON_Value>(&t_input.m_value);
 			if (temp_value == nullptr)
 			{
@@ -927,19 +933,29 @@ namespace cjw
 			}
 			return output;
 		}
+		/*
+		* Returns a double contained in an array or -1 on error.
+		* @param t_input Array to be evaluated (usually obtained with an())
+		* @returns double
+		*/
 		static double r_double(const Node::JSON_Value& t_input)
 		{
-			double output = 0;
+			double output = -1;
 			if (std::holds_alternative<double>(t_input.m_value_individual))
 			{
 				output = std::get<double>(t_input.m_value_individual);
 			}
 			return output;
 		}
+		/*
+		* Returns a double contained in an object or -1 on error.
+		* @param t_input Obejct to be evaluated (usually obtained with dn())
+		* @returns double
+		*/
 		static double r_double(const Node::JSON_KVP& t_input)
 		{
 			if (t_input.m_key == "NULL") { return -1; } // check for object not found
-			double output = 0;
+			double output = -1;
 			const Node::JSON_Value* temp_value = std::get_if<Node::JSON_Value>(&t_input.m_value);
 			if (temp_value == nullptr)
 			{
@@ -959,6 +975,11 @@ namespace cjw
 
 			return output;
 		}
+		/*
+		* Returns a bool contained in an array or false on error.
+		* @param t_input Array to be evaluated (usually obtained with an())
+		* @returns bool
+		*/
 		static bool r_bool(const Node::JSON_Value& t_input)
 		{
 			bool output = false;
@@ -968,6 +989,11 @@ namespace cjw
 			}
 			return output;
 		}
+		/*
+		* Returns a bool contained in an object or false on error.
+		* @param t_input Object to be evaluated (usually obtained with dn())
+		* @returns bool
+		*/
 		static bool r_bool(const Node::JSON_KVP& t_input)
 		{
 			if (t_input.m_key == "NULL") { return 0; } // check for object not found
@@ -991,6 +1017,11 @@ namespace cjw
 
 			return output;
 		}
+		/*
+		* Returns a string contained in an array or an empty string on error.
+		* @param t_input Array to be evaluated (usually obtained with an())
+		* @returns std::string
+		*/
 		static std::string r_string(const Node::JSON_Value& t_input)
 		{
 			std::string output = "";
@@ -1000,9 +1031,14 @@ namespace cjw
 			}
 			return output;
 		}
+		/*
+		* Returns a string contained in an object or an empty string on error.
+		* @param t_input Object to be evaluated (usually obtained with dn())
+		* @returns std::string
+		*/
 		static std::string r_string(const Node::JSON_KVP& t_input)
 		{
-			if (t_input.m_key == "NULL") { return "NULL"; } // check for object not found
+			if (t_input.m_key == "NULL") { return ""; } // check for object not found
 			std::string output = "";
 			const Node::JSON_Value* temp_value = std::get_if<Node::JSON_Value>(&t_input.m_value);
 			if (temp_value != nullptr)			
@@ -1058,10 +1094,13 @@ namespace cjw
 
 		//************************************************ UPDATE ***********************************************\\
 
+		// Updates an objects key
 		void static update_key(const std::string t_new_key, Node::JSON_KVP& t_object) noexcept
 		{
 			t_object.m_key = t_new_key;
 		}
+
+		// Overloaded method to update an objects value to a new value of any type
 		void static update_value(const int t_new_value, Node::JSON_KVP& t_object) noexcept
 		{
 			Node::JSON_Value* value_ptr = std::get_if<Node::JSON_Value>(&t_object.m_value);
@@ -1101,6 +1140,7 @@ namespace cjw
 
 		//************************************************ DELETE ***********************************************\\
 
+		// Traverses the entire JSON_List structure and deletes the first instance of the key that it finds.
 		void remove_first_found(const std::string t_key)
 		{
 			std::pair<std::vector<Node::JSON_KVP>*, int> vector_reference_and_index = main_list.recursive_find_parent_vector_and_index(t_key);
@@ -1111,6 +1151,8 @@ namespace cjw
 				temp_vector_ptr->erase(temp_vector_ptr->begin() + vector_index);
 			}
 		}
+
+		// Overloaded method that deletes an index from an array or nested array
 		void static remove_from_array(Node::JSON_Value& t_array, const int t_index)
 		{
 			std::shared_ptr<std::vector<Node::JSON_Value>>* temp_array_ptr = std::get_if<std::shared_ptr<std::vector<Node::JSON_Value>>>(&t_array.m_value_individual);
@@ -1128,6 +1170,8 @@ namespace cjw
 				temp_value_ptr->erase(temp_value_ptr->begin() + t_index);
 			}
 		}
+
+		// Deletes a key value pair from an object
 		void static remove_from_object(Node::JSON_KVP& t_object, const std::string t_key)
 		{
 			Node::JSON_Value* temp_value_ptr = std::get_if<Node::JSON_Value>(&t_object.m_value);
@@ -1302,5 +1346,5 @@ namespace cjw
 	};
 }
 
-#endif // !jsontr.h
+#endif // !jsonator.h
 
