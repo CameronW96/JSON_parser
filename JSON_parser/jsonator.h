@@ -5,7 +5,7 @@
 * C++ 17 is required for variant and type traits.
 * 
 * More info: https://cameronw96.github.io/JSONator
-* Github repo: https://github.com/CameronW96/JSONator* 
+* Github repo: https://github.com/CameronW96/JSONator
 */
 
 #pragma once
