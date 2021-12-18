@@ -33,7 +33,7 @@ constexpr auto UNEXPECTED_TYPE_ERR = "TYPE ERR: TYPE CONTAINED DOES NOT MATCH TY
 constexpr auto RETURN_TYPE_ERR = "TYPE ERR: CANNOT RETURN NON-PRIMITIVE TYPE";
 constexpr auto NOT_FOUND_ERR = "KEY NOT FOUND";
 
-namespace cjw
+namespace JSONator
 {
 
 	class JSON_List
