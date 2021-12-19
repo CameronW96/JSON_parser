@@ -51,7 +51,7 @@ namespace JSONator
 			*/
 			class JSON_Value
 			{ 
-				using var_t = std::variant<int, bool, double, std::string, std::shared_ptr<Node>, std::shared_ptr<std::vector<JSON_Value>>>;
+				using var_t = std::variant<int, bool, double, std::string, std::shared_ptr<Node>, std::shared_ptr<std::vector<JSON_Value>>, void*>; // void* only for holding nullptr in error state
 			public:
 				var_t m_value_individual = 0;
 
@@ -103,6 +103,13 @@ namespace JSONator
 					JSON_KVP& temp_kvp = (*temp_node)->find_by_key(t_key);
 
 					return temp_kvp;
+				}
+
+				static const JSON_Value make_error_value() noexcept
+				{
+					JSON_Value temp_value;
+					temp_value.m_value_individual = nullptr;
+					return temp_value;
 				}
 			};
 			/*
@@ -198,6 +205,7 @@ namespace JSONator
 		private:
 			std::string m_object_key;
 			std::variant<JSON_KVP, std::vector<JSON_KVP>> m_kvp;
+			JSON_Value error_value = JSON_Value::make_error_value();
 			JSON_KVP error_kvp = JSON_KVP::make_error_kvp();	// for not found errors with dn()
 
 		private:
