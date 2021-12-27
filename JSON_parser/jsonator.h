@@ -51,9 +51,10 @@ namespace JSONator
 			*/
 			class JSON_Value
 			{ 
-				using var_t = std::variant<int, bool, double, std::string, std::shared_ptr<Node>, std::shared_ptr<std::vector<JSON_Value>>, void*>; // void* only for holding nullptr in error state
+				using var_t = std::variant<int, bool, double, std::string, std::shared_ptr<Node>, std::shared_ptr<std::vector<JSON_Value>>>; // void* only for holding nullptr in error state
 			public:
 				var_t m_value_individual = 0;
+				bool m_error_state = 0;
 
 			public:
 				/*
@@ -69,11 +70,13 @@ namespace JSONator
 					std::shared_ptr<std::vector<JSON_Value>>* temp_value_array = std::get_if<std::shared_ptr<std::vector<JSON_Value>>>(&m_value_individual);
 					if (temp_value_array == nullptr)
 					{
-						throw ARRAY_ERR;
+						std::shared_ptr<JSON_Value> error_value = heap_allocate_error_value();
+						return *error_value;
 					}
 					else if (t_index > (*temp_value_array)->size())
 					{
-						throw ARRAY_ERR_INDEX;
+						std::shared_ptr<JSON_Value> error_value = heap_allocate_error_value();
+						return *error_value;
 					}
 					else
 					{
@@ -97,7 +100,8 @@ namespace JSONator
 					std::shared_ptr<Node>* temp_node = std::get_if<std::shared_ptr<Node>>(&m_value_individual);
 					if (temp_node == nullptr)
 					{
-						throw;
+						std::shared_ptr<JSON_KVP> error_kvp = heap_allocate_error_kvp();
+						return *error_kvp;
 					}
 
 					JSON_KVP& temp_kvp = (*temp_node)->find_by_key(t_key);
@@ -105,12 +109,6 @@ namespace JSONator
 					return temp_kvp;
 				}
 
-				static const JSON_Value make_error_value() noexcept
-				{
-					JSON_Value temp_value;
-					temp_value.m_value_individual = nullptr;
-					return temp_value;
-				}
 			};
 			/*
 			* Class that represents the Key-Value pair structure.
@@ -122,6 +120,7 @@ namespace JSONator
 			public:
 				std::string m_key;
 				std::variant<JSON_Value, std::vector<JSON_Value>> m_value;
+				bool m_error_state = false;
 
 			public:
 				const static JSON_KVP make_kvp(const std::string& t_key, const JSON_Value& t_value) noexcept
@@ -161,11 +160,13 @@ namespace JSONator
 					std::vector<JSON_Value>* temp_value_array = std::get_if<std::vector<JSON_Value>>(&m_value);
 					if (temp_value_array == nullptr)
 					{
-						throw ARRAY_ERR;
+						std::shared_ptr<JSON_Value> error_value = heap_allocate_error_value();
+						return *error_value;
 					}
 					else if (t_index > temp_value_array->size())
 					{
-						throw ARRAY_ERR_INDEX;
+						std::shared_ptr<JSON_Value> error_value = heap_allocate_error_value();
+						return *error_value;
 					}
 					else
 					{
@@ -188,13 +189,15 @@ namespace JSONator
 					JSON_Value* temp_value = std::get_if<JSON_Value>(&m_value);
 					if (temp_value == nullptr)
 					{
-						throw;
+						std::shared_ptr<JSON_KVP> error_kvp = heap_allocate_error_kvp();
+						return *error_kvp;
 					}
 					// get pointer to m_value_individual - stored in m_value
 					std::shared_ptr<Node>* temp_node = std::get_if<std::shared_ptr<Node>>(&temp_value->m_value_individual);
 					if (temp_node == nullptr)
 					{
-						throw;
+						std::shared_ptr<JSON_KVP> error_kvp = heap_allocate_error_kvp();
+						return *error_kvp;
 					}
 
 					JSON_KVP& temp_kvp = (*temp_node)->find_by_key(t_key);
@@ -205,8 +208,7 @@ namespace JSONator
 		private:
 			std::string m_object_key;
 			std::variant<JSON_KVP, std::vector<JSON_KVP>> m_kvp;
-			JSON_Value error_value = JSON_Value::make_error_value();
-			JSON_KVP error_kvp = JSON_KVP::make_error_kvp();	// for not found errors with dn()
+			JSON_KVP node_error_kvp = JSON_KVP::make_error_kvp();	// for not found errors with find_by_key()
 
 		private:
 			JSON_KVP& find_by_key(const std::string& t_key)
@@ -214,7 +216,8 @@ namespace JSONator
 				std::vector<Node::JSON_KVP>* temp_kvp_array = std::get_if<std::vector<Node::JSON_KVP>>(&m_kvp);
 				if (temp_kvp_array == nullptr)
 				{
-					return error_kvp;
+					std::shared_ptr<JSON_KVP> error_kvp = heap_allocate_error_kvp();
+					return *error_kvp;
 				}
 				else
 				{
@@ -226,7 +229,8 @@ namespace JSONator
 							return temp_kvp;
 						}
 					}
-					return error_kvp;
+					std::shared_ptr<JSON_KVP> error_kvp = heap_allocate_error_kvp();
+					return *error_kvp;
 				}
 			}
 
@@ -263,9 +267,7 @@ namespace JSONator
 						}
 						else if (format_value(temp_kvp.m_key) == t_key)
 						{
-							return_value.first = temp_kvp_array;
-							return_value.second = i;
-							return return_value;
+							return std::make_pair(temp_kvp_array, i);
 						}
 						return std::make_pair(nullptr, -1); // Failed to find key
 					}
@@ -344,6 +346,30 @@ namespace JSONator
 	private:
 
 		//*************************************** STATIC HELPER FUNCTIONS ***************************************\\
+
+		/*
+		* Heap allocates a JSON_Value object with the m_error_state flag set to true.
+		* When used with return, update, or delete functions the object will be deleted when the function goes out of scope.
+		* @returns std::shared_ptr<Node::JSON_Value>
+		*/
+		const static std::shared_ptr<Node::JSON_Value>& heap_allocate_error_value()
+		{
+			std::shared_ptr<Node::JSON_Value> error_object(new Node::JSON_Value); // deallocated once the return or update function goes out of scope
+			error_object->m_error_state = true;
+			return error_object;
+		}
+
+		/*
+		* Heap allocates a JSON_KVP object with the m_error_state flag set to true.
+		* When used with return, update, or delete functions the object will be deleted when the function goes out of scope.
+		* @returns std::shared_ptr<Node::JSON_Value>
+		*/
+		const static std::shared_ptr<Node::JSON_KVP> heap_allocate_error_kvp()
+		{
+			std::shared_ptr<Node::JSON_KVP> error_object(new Node::JSON_KVP); // deallocated once the return or update function goes out of scope
+			error_object->m_error_state = true;
+			return error_object;
+		}
 
 		/* 
 		* Checks if a string represents an integer, double, or neither.
@@ -1074,11 +1100,13 @@ namespace JSONator
 			std::vector<Node::JSON_KVP>* temp_kvp_array = std::get_if<std::vector<Node::JSON_KVP>>(&main_list.m_kvp);
 			if (temp_kvp_array == nullptr)
 			{
-				throw ARRAY_ERR;
+				std::shared_ptr<Node::JSON_KVP> error_kvp = heap_allocate_error_kvp();
+				return *error_kvp;
 			}
 			else if (t_index > temp_kvp_array->size())
 			{
-				throw ARRAY_ERR_INDEX;
+				std::shared_ptr<Node::JSON_KVP> error_kvp = heap_allocate_error_kvp();
+				return *error_kvp;
 			}
 			else
 			{
