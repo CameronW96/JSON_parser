@@ -70,13 +70,13 @@ namespace JSONator
 					std::shared_ptr<std::vector<JSON_Value>>* temp_value_array = std::get_if<std::shared_ptr<std::vector<JSON_Value>>>(&m_value_individual);
 					if (temp_value_array == nullptr)
 					{
-						std::shared_ptr<JSON_Value> error_value = heap_allocate_error_value();
-						return *error_value;
+						std::shared_ptr<JSON_Value>* error_value = heap_allocate_error_value();
+						return **error_value;
 					}
 					else if (t_index > (*temp_value_array)->size())
 					{
-						std::shared_ptr<JSON_Value> error_value = heap_allocate_error_value();
-						return *error_value;
+						std::shared_ptr<JSON_Value>* error_value = heap_allocate_error_value();
+						return **error_value;
 					}
 					else
 					{
@@ -100,8 +100,8 @@ namespace JSONator
 					std::shared_ptr<Node>* temp_node = std::get_if<std::shared_ptr<Node>>(&m_value_individual);
 					if (temp_node == nullptr)
 					{
-						std::shared_ptr<JSON_KVP> error_kvp = heap_allocate_error_kvp();
-						return *error_kvp;
+						std::shared_ptr<JSON_KVP>* error_kvp = heap_allocate_error_kvp();
+						return **error_kvp;
 					}
 
 					JSON_KVP& temp_kvp = (*temp_node)->find_by_key(t_key);
@@ -160,13 +160,13 @@ namespace JSONator
 					std::vector<JSON_Value>* temp_value_array = std::get_if<std::vector<JSON_Value>>(&m_value);
 					if (temp_value_array == nullptr)
 					{
-						std::shared_ptr<JSON_Value> error_value = heap_allocate_error_value();
-						return *error_value;
+						std::shared_ptr<JSON_Value>* error_value = heap_allocate_error_value();
+						return **error_value;
 					}
 					else if (t_index > temp_value_array->size())
 					{
-						std::shared_ptr<JSON_Value> error_value = heap_allocate_error_value();
-						return *error_value;
+						std::shared_ptr<JSON_Value>* error_value = heap_allocate_error_value();
+						return **error_value;
 					}
 					else
 					{
@@ -189,15 +189,15 @@ namespace JSONator
 					JSON_Value* temp_value = std::get_if<JSON_Value>(&m_value);
 					if (temp_value == nullptr)
 					{
-						std::shared_ptr<JSON_KVP> error_kvp = heap_allocate_error_kvp();
-						return *error_kvp;
+						std::shared_ptr<JSON_KVP>* error_kvp = heap_allocate_error_kvp();
+						return **error_kvp;
 					}
 					// get pointer to m_value_individual - stored in m_value
 					std::shared_ptr<Node>* temp_node = std::get_if<std::shared_ptr<Node>>(&temp_value->m_value_individual);
 					if (temp_node == nullptr)
 					{
-						std::shared_ptr<JSON_KVP> error_kvp = heap_allocate_error_kvp();
-						return *error_kvp;
+						std::shared_ptr<JSON_KVP>* error_kvp = heap_allocate_error_kvp();
+						return **error_kvp;
 					}
 
 					JSON_KVP& temp_kvp = (*temp_node)->find_by_key(t_key);
@@ -216,8 +216,8 @@ namespace JSONator
 				std::vector<Node::JSON_KVP>* temp_kvp_array = std::get_if<std::vector<Node::JSON_KVP>>(&m_kvp);
 				if (temp_kvp_array == nullptr)
 				{
-					std::shared_ptr<JSON_KVP> error_kvp = heap_allocate_error_kvp();
-					return *error_kvp;
+					std::shared_ptr<JSON_KVP>* error_kvp = heap_allocate_error_kvp();
+					return **error_kvp;
 				}
 				else
 				{
@@ -229,8 +229,8 @@ namespace JSONator
 							return temp_kvp;
 						}
 					}
-					std::shared_ptr<JSON_KVP> error_kvp = heap_allocate_error_kvp();
-					return *error_kvp;
+					std::shared_ptr<JSON_KVP>* error_kvp = heap_allocate_error_kvp();
+					return **error_kvp;
 				}
 			}
 
@@ -352,11 +352,11 @@ namespace JSONator
 		* When used with return, update, or delete functions the object will be deleted when the function goes out of scope.
 		* @returns std::shared_ptr<Node::JSON_Value>
 		*/
-		const static std::shared_ptr<Node::JSON_Value>& heap_allocate_error_value()
+		static std::shared_ptr<Node::JSON_Value>* heap_allocate_error_value()
 		{
 			std::shared_ptr<Node::JSON_Value> error_object(new Node::JSON_Value); // deallocated once the return or update function goes out of scope
 			error_object->m_error_state = true;
-			return error_object;
+			return &error_object;
 		}
 
 		/*
@@ -364,11 +364,11 @@ namespace JSONator
 		* When used with return, update, or delete functions the object will be deleted when the function goes out of scope.
 		* @returns std::shared_ptr<Node::JSON_Value>
 		*/
-		const static std::shared_ptr<Node::JSON_KVP> heap_allocate_error_kvp()
+		static std::shared_ptr<Node::JSON_KVP>* heap_allocate_error_kvp()
 		{
 			std::shared_ptr<Node::JSON_KVP> error_object(new Node::JSON_KVP); // deallocated once the return or update function goes out of scope
 			error_object->m_error_state = true;
-			return error_object;
+			return &error_object;
 		}
 
 		/* 
@@ -932,7 +932,8 @@ namespace JSONator
 		* @returns int
 		*/
 		static int r_int(const Node::JSON_Value& t_input)
-		{
+		{			
+			if (t_input.m_error_state == true) { return -1; }
 			int output = -1;
 			if (std::holds_alternative<int>(t_input.m_value_individual))
 			{
@@ -947,12 +948,12 @@ namespace JSONator
 		*/
 		static int r_int(const Node::JSON_KVP& t_input)
 		{
-			if (t_input.m_key == "NULL") { return -1; } // check for object not found
+			if (t_input.m_error_state == true) { return -1; }
 			int output = -1;
 			const Node::JSON_Value* temp_value = std::get_if<Node::JSON_Value>(&t_input.m_value);
 			if (temp_value == nullptr)
 			{
-				throw RETURN_TYPE_ERR;
+				return -1;
 			}
 			else
 			{
@@ -962,7 +963,7 @@ namespace JSONator
 				}
 				else
 				{
-					throw UNEXPECTED_TYPE_ERR;
+					return -1;
 				}
 			}
 			return output;
@@ -974,6 +975,7 @@ namespace JSONator
 		*/
 		static double r_double(const Node::JSON_Value& t_input)
 		{
+			if (t_input.m_error_state == true) { return -1; }
 			double output = -1;
 			if (std::holds_alternative<double>(t_input.m_value_individual))
 			{
@@ -988,12 +990,12 @@ namespace JSONator
 		*/
 		static double r_double(const Node::JSON_KVP& t_input)
 		{
-			if (t_input.m_key == "NULL") { return -1; } // check for object not found
+			if (t_input.m_error_state == true) { return -1; }
 			double output = -1;
 			const Node::JSON_Value* temp_value = std::get_if<Node::JSON_Value>(&t_input.m_value);
 			if (temp_value == nullptr)
 			{
-				throw RETURN_TYPE_ERR;
+				return -1;
 			}
 			else
 			{
@@ -1003,10 +1005,9 @@ namespace JSONator
 				}
 				else
 				{
-					throw UNEXPECTED_TYPE_ERR;
+					return -1;
 				}
 			}
-
 			return output;
 		}
 		/*
@@ -1016,6 +1017,7 @@ namespace JSONator
 		*/
 		static bool r_bool(const Node::JSON_Value& t_input)
 		{
+			if (t_input.m_error_state == true) { return false; }
 			bool output = false;
 			if (std::holds_alternative<bool>(t_input.m_value_individual))
 			{
@@ -1030,12 +1032,12 @@ namespace JSONator
 		*/
 		static bool r_bool(const Node::JSON_KVP& t_input)
 		{
-			if (t_input.m_key == "NULL") { return 0; } // check for object not found
+			if (t_input.m_error_state == true) { return false; }
 			bool output = false;
 			const Node::JSON_Value* temp_value = std::get_if<Node::JSON_Value>(&t_input.m_value);
 			if (temp_value == nullptr)
 			{
-				throw RETURN_TYPE_ERR;
+				return false;
 			}
 			else
 			{
@@ -1045,10 +1047,9 @@ namespace JSONator
 				}
 				else
 				{
-					throw UNEXPECTED_TYPE_ERR;
+					return false;
 				}
 			}
-
 			return output;
 		}
 		/*
@@ -1058,6 +1059,7 @@ namespace JSONator
 		*/
 		static std::string r_string(const Node::JSON_Value& t_input)
 		{
+			if (t_input.m_error_state == true) { return ""; }
 			std::string output = "";
 			if (std::holds_alternative<std::string>(t_input.m_value_individual))
 			{
@@ -1072,7 +1074,7 @@ namespace JSONator
 		*/
 		static std::string r_string(const Node::JSON_KVP& t_input)
 		{
-			if (t_input.m_key == "NULL") { return ""; } // check for object not found
+			if (t_input.m_error_state == true) { return ""; }
 			std::string output = "";
 			const Node::JSON_Value* temp_value = std::get_if<Node::JSON_Value>(&t_input.m_value);
 			if (temp_value != nullptr)			
@@ -1100,13 +1102,13 @@ namespace JSONator
 			std::vector<Node::JSON_KVP>* temp_kvp_array = std::get_if<std::vector<Node::JSON_KVP>>(&main_list.m_kvp);
 			if (temp_kvp_array == nullptr)
 			{
-				std::shared_ptr<Node::JSON_KVP> error_kvp = heap_allocate_error_kvp();
-				return *error_kvp;
+				std::shared_ptr<Node::JSON_KVP>* error_kvp = heap_allocate_error_kvp();
+				return **error_kvp;
 			}
 			else if (t_index > temp_kvp_array->size())
 			{
-				std::shared_ptr<Node::JSON_KVP> error_kvp = heap_allocate_error_kvp();
-				return *error_kvp;
+				std::shared_ptr<Node::JSON_KVP>* error_kvp = heap_allocate_error_kvp();
+				return **error_kvp;
 			}
 			else
 			{
@@ -1133,45 +1135,72 @@ namespace JSONator
 		// Updates an objects key
 		void static update_key(const std::string t_new_key, Node::JSON_KVP& t_object) noexcept
 		{
-			t_object.m_key = t_new_key;
+			if (t_object.m_error_state == false)
+			{
+				t_object.m_key = t_new_key;
+			}
 		}
 
 		// Overloaded method to update an objects value to a new value of any type
 		void static update_value(const int t_new_value, Node::JSON_KVP& t_object) noexcept
 		{
-			Node::JSON_Value* value_ptr = std::get_if<Node::JSON_Value>(&t_object.m_value);
-			value_ptr->m_value_individual = t_new_value;
+			if (t_object.m_error_state == false)
+			{
+				Node::JSON_Value* value_ptr = std::get_if<Node::JSON_Value>(&t_object.m_value);
+				value_ptr->m_value_individual = t_new_value;
+			}
 		}
 		void static update_value(const double t_new_value, Node::JSON_KVP& t_object) noexcept
 		{
-			Node::JSON_Value* value_ptr = std::get_if<Node::JSON_Value>(&t_object.m_value);
-			value_ptr->m_value_individual = t_new_value;
+			if (t_object.m_error_state == false)
+			{
+				Node::JSON_Value* value_ptr = std::get_if<Node::JSON_Value>(&t_object.m_value);
+				value_ptr->m_value_individual = t_new_value;
+			}
 		}
 		void static update_value(const bool t_new_value, Node::JSON_KVP& t_object) noexcept
 		{
-			Node::JSON_Value* value_ptr = std::get_if<Node::JSON_Value>(&t_object.m_value);
-			value_ptr->m_value_individual = t_new_value;
+			if (t_object.m_error_state == false)
+			{
+				Node::JSON_Value* value_ptr = std::get_if<Node::JSON_Value>(&t_object.m_value);
+				value_ptr->m_value_individual = t_new_value;
+			}
 		}
 		void static update_value(const std::string t_new_value, Node::JSON_KVP& t_object) noexcept
 		{
-			Node::JSON_Value* value_ptr = std::get_if<Node::JSON_Value>(&t_object.m_value);
-			value_ptr->m_value_individual = t_new_value;
+			if (t_object.m_error_state == false)
+			{
+				Node::JSON_Value* value_ptr = std::get_if<Node::JSON_Value>(&t_object.m_value);
+				value_ptr->m_value_individual = t_new_value;
+			}
 		}
 		void static update_value(const int t_new_value, Node::JSON_Value& t_value) noexcept
 		{
-			t_value.m_value_individual = t_new_value;
+			if (t_value.m_error_state == false)
+			{
+				t_value.m_value_individual = t_new_value;
+			}
 		}
 		void static update_value(const double t_new_value, Node::JSON_Value& t_value) noexcept
 		{
-			t_value.m_value_individual = t_new_value;
+			if (t_value.m_error_state == false)
+			{
+				t_value.m_value_individual = t_new_value;
+			}
 		}
 		void static update_value(const bool t_new_value, Node::JSON_Value& t_value) noexcept
 		{
-			t_value.m_value_individual = t_new_value;
+			if (t_value.m_error_state == false)
+			{
+				t_value.m_value_individual = t_new_value;
+			}
 		}
 		void static update_value(const std::string t_new_value, Node::JSON_Value& t_value) noexcept
 		{
-			t_value.m_value_individual = t_new_value;
+			if (t_value.m_error_state == false)
+			{
+				t_value.m_value_individual = t_new_value;
+			}
 		}
 
 		//************************************************ DELETE ***********************************************\\
@@ -1191,41 +1220,50 @@ namespace JSONator
 		// Overloaded method that deletes an index from an array or nested array
 		void static remove_from_array(Node::JSON_Value& t_array, const int t_index)
 		{
-			std::shared_ptr<std::vector<Node::JSON_Value>>* temp_array_ptr = std::get_if<std::shared_ptr<std::vector<Node::JSON_Value>>>(&t_array.m_value_individual);
-			if (temp_array_ptr != nullptr)
+			if (t_array.m_error_state == false)
 			{
-				(*temp_array_ptr)->erase((*temp_array_ptr)->begin() + t_index);
+				std::shared_ptr<std::vector<Node::JSON_Value>>* temp_array_ptr = std::get_if<std::shared_ptr<std::vector<Node::JSON_Value>>>(&t_array.m_value_individual);
+				if (temp_array_ptr != nullptr)
+				{
+					(*temp_array_ptr)->erase((*temp_array_ptr)->begin() + t_index);
+				}
 			}
 		}
 		void static remove_from_array(Node::JSON_KVP& t_object, const int t_index)
 
 		{
-			std::vector<Node::JSON_Value>* temp_value_ptr = std::get_if<std::vector<Node::JSON_Value>>(&t_object.m_value);
-			if (temp_value_ptr != nullptr)
+			if (t_object.m_error_state == false)
 			{
-				temp_value_ptr->erase(temp_value_ptr->begin() + t_index);
+				std::vector<Node::JSON_Value>* temp_value_ptr = std::get_if<std::vector<Node::JSON_Value>>(&t_object.m_value);
+				if (temp_value_ptr != nullptr)
+				{
+					temp_value_ptr->erase(temp_value_ptr->begin() + t_index);
+				}
 			}
 		}
 
 		// Deletes a key value pair from an object
 		void static remove_from_object(Node::JSON_KVP& t_object, const std::string t_key)
 		{
-			Node::JSON_Value* temp_value_ptr = std::get_if<Node::JSON_Value>(&t_object.m_value);
-			if (temp_value_ptr != nullptr)
+			if (t_object.m_error_state == false)
 			{
-				std::shared_ptr<Node>* temp_node_ptr = std::get_if<std::shared_ptr<Node>>(&temp_value_ptr->m_value_individual);
-				if (temp_node_ptr != nullptr)
+				Node::JSON_Value* temp_value_ptr = std::get_if<Node::JSON_Value>(&t_object.m_value);
+				if (temp_value_ptr != nullptr)
 				{
-					std::vector<Node::JSON_KVP>* temp_object_vector_ptr = std::get_if<std::vector<Node::JSON_KVP>>(&(*temp_node_ptr)->m_kvp);
-					if (temp_object_vector_ptr != nullptr)
+					std::shared_ptr<Node>* temp_node_ptr = std::get_if<std::shared_ptr<Node>>(&temp_value_ptr->m_value_individual);
+					if (temp_node_ptr != nullptr)
 					{
-						for (int i = 0; i < temp_object_vector_ptr->size(); i++)
+						std::vector<Node::JSON_KVP>* temp_object_vector_ptr = std::get_if<std::vector<Node::JSON_KVP>>(&(*temp_node_ptr)->m_kvp);
+						if (temp_object_vector_ptr != nullptr)
 						{
-							Node::JSON_KVP current_object = (*temp_object_vector_ptr)[i];
-							if (format_value(current_object.m_key) == t_key)
+							for (int i = 0; i < temp_object_vector_ptr->size(); i++)
 							{
-								temp_object_vector_ptr->erase(temp_object_vector_ptr->begin() + i);
-								break;
+								Node::JSON_KVP current_object = (*temp_object_vector_ptr)[i];
+								if (format_value(current_object.m_key) == t_key)
+								{
+									temp_object_vector_ptr->erase(temp_object_vector_ptr->begin() + i);
+									break;
+								}
 							}
 						}
 					}
@@ -1273,7 +1311,7 @@ namespace JSONator
 					else // is a primitive value
 					{
 						std::string converted_value = "";
-						//determine type and convert to string
+						// determine type and convert to string
 						if (std::holds_alternative<int>(temp_value_ptr->m_value_individual))
 						{
 							converted_value = std::to_string(std::get<int>(temp_value_ptr->m_value_individual));
