@@ -27,17 +27,17 @@
 namespace JSONator
 {
 
-	class JSON_List
+	class JSON
 	{
 	private:
 		class Node
 		{
-			friend class JSON_List;
+			friend class JSON;
 		private:
 			class JSON_KVP; // forward declaration
 			/*
 			* Class that contains a variant to serve as a typesafe union.
-			* Contains two methods to support array notation and dot notation syntax when accessing a JSON_List.
+			* Contains two methods to support array notation and dot notation syntax when accessing a JSON.
 			* Exists to allow multi-type array's and JSON objects.
 			*/
 			class JSON_Value
@@ -50,7 +50,7 @@ namespace JSONator
 			public:
 				/*
 				* Method that returns a reference to the JSON_Value object located at a specific index in an array.
-				* A version of this exists in three classes: JSON_List, JSON_KVP, and JSON_Value. All methods have the
+				* A version of this exists in three classes: JSON, JSON_KVP, and JSON_Value. All methods have the
 				* same name to facilitate ease of use by the end user. Calls to an() and dn() can be chained in a similar
 				* manner to using array notation and dot notation when accessing JSON objects in Javascript. This is used
 				* primarily to provide a specific array index to the return, update, or delete methods.
@@ -74,7 +74,7 @@ namespace JSONator
 
 				/*
 				* Method that returns a reference to a JSON_KVP object located inside of a JSON object. A version of this
-				* method exists across three classes: JSON_List, JSON_KVP, and JSON_Value. All methods have the
+				* method exists across three classes: JSON, JSON_KVP, and JSON_Value. All methods have the
 				* same name to facilitate ease of use by the end user. Calls to an() and dn() can be chained in a similar
 				* manner to using array notation and dot notation when accessing JSON objects in Javascript. This is used
 				* primarily to provide a specific object to the return, update, or delete methods.
@@ -135,7 +135,7 @@ namespace JSONator
 
 				/*
 				* Method that returns a reference to the JSON_Value object located at a specific index in an array.
-				* A version of this exists in three classes: JSON_List, JSON_KVP, and JSON_Value. All methods have the
+				* A version of this exists in three classes: JSON, JSON_KVP, and JSON_Value. All methods have the
 				* same name to facilitate ease of use by the end user. Calls to an() and dn() can be chained in a similar
 				* manner to using array notation and dot notation when accessing JSON objects in Javascript. This is used
 				* primarily to provide a specific array index to the return, update, or delete methods.
@@ -158,7 +158,7 @@ namespace JSONator
 
 				/*
 				* Method that returns a reference to a JSON_KVP object located inside of a JSON object. A version of this
-				* method exists across three classes: JSON_List, JSON_KVP, and JSON_Value. All methods have the
+				* method exists across three classes: JSON, JSON_KVP, and JSON_Value. All methods have the
 				* same name to facilitate ease of use by the end user. Calls to an() and dn() can be chained in a similar
 				* manner to using array notation and dot notation when accessing JSON objects in Javascript. This is used
 				* primarily to provide a specific object to the return, update, or delete methods.
@@ -601,7 +601,7 @@ namespace JSONator
 		* which will then return a primitive, call read_array(), or make a recursive call to read_object().
 		* Note that read_array also calls get_value() if the array contains an object.
 		* @param t_object_input The object value to be parsed.
-		* @returns A vector of JSON_KVP objects which is the basis for the JSON_List object.
+		* @returns A vector of JSON_KVP objects which is the basis for the JSON object.
 		* @see get_value()
 		*/
 		static std::vector<Node::JSON_KVP> read_object(std::string t_object_input)
@@ -868,14 +868,14 @@ namespace JSONator
 
 	public:
 		/**
-		* Parses string input using recursion to traverse a text JSON object and populate the JSON_List structure.
+		* Parses string input using recursion to traverse a text JSON object and populate the JSON structure.
 		* @param t_json_input JSON formatted text input.
-		* @returns A JSON_List object
+		* @returns A JSON object
 		* @see get_value(), read_array(), read_object()
 		*/
-		static JSON_List parse(std::string t_json_input)
+		static JSON parse(std::string t_json_input)
 		{
-			JSON_List temp_list;
+			JSON temp_list;
 			temp_list.main_list.init_object("", read_object(t_json_input));
 			return temp_list;			
 		}
@@ -1103,7 +1103,7 @@ namespace JSONator
 
 		/*
 		* Method that returns a reference to the JSON_Value object located at a specific index in an array.
-		* A version of this exists in three classes: JSON_List, JSON_KVP, and JSON_Value. All methods have the
+		* A version of this exists in three classes: JSON, JSON_KVP, and JSON_Value. All methods have the
 		* same name to facilitate ease of use by the end user. Calls to an() and dn() can be chained in a similar
 		* manner to using array notation and dot notation when accessing JSON objects in Javascript. This is used
 		* primarily to provide a specific array index to the return, update, or delete methods.
@@ -1131,7 +1131,7 @@ namespace JSONator
 
 		/*
 		* Method that returns a reference to a JSON_KVP object located inside of a JSON object. A version of this
-		* method exists across three classes: JSON_List, JSON_KVP, and JSON_Value. All methods have the
+		* method exists across three classes: JSON, JSON_KVP, and JSON_Value. All methods have the
 		* same name to facilitate ease of use by the end user. Calls to an() and dn() can be chained in a similar
 		* manner to using array notation and dot notation when accessing JSON objects in Javascript. This is used
 		* primarily to provide a specific object to the return, update, or delete methods.
@@ -1253,7 +1253,7 @@ namespace JSONator
 
 		//************************************************ DELETE ***********************************************\\
 
-		// Traverses the entire JSON_List structure and deletes the first instance of the key that it finds.
+		// Traverses the entire JSON structure and deletes the first instance of the key that it finds.
 		void remove_first_found(const std::string t_key)
 		{
 			std::pair<std::vector<Node::JSON_KVP>*, int> vector_reference_and_index = main_list.recursive_find_parent_vector_and_index(t_key);
@@ -1334,9 +1334,9 @@ namespace JSONator
 		//*********************************************** SERIALIZE *********************************************\\
 
 		/**
-		* Serializes the contents of the curent JSON_List structure.
+		* Serializes the contents of the curent JSON structure.
 		* Will be a "flat packed" JSON object with no newline formatting.
-		* @param t_node_object A nested JSON object within the JSON_List structure.
+		* @param t_node_object A nested JSON object within the JSON structure.
 		* @returns std::string
 		*/
 		static std::string serialize(const Node& t_node_object)
@@ -1410,7 +1410,7 @@ namespace JSONator
 
 		// there must be a cleaner way to do this - function needs to be able to handle a Node object as well as a JSON_list
 		// object in order to make recursive calls
-		static std::string serialize(const JSON_List& t_main_list)
+		static std::string serialize(const JSON& t_main_list)
 		{
 			std::stringstream output;
 			output << "{";
