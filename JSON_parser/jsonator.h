@@ -59,12 +59,7 @@ namespace JSONator
 				JSON_Value& an(const int t_index)
 				{
 					std::shared_ptr<std::vector<JSON_Value>>* temp_value_array = std::get_if<std::shared_ptr<std::vector<JSON_Value>>>(&m_value_individual);
-					if (temp_value_array == nullptr)
-					{
-						JSON_Value* error_value = heap_allocate_error_value();
-						return *error_value;
-					}
-					else if (t_index > (*temp_value_array)->size())
+					if (temp_value_array == nullptr || t_index > (*temp_value_array)->size())
 					{
 						JSON_Value* error_value = heap_allocate_error_value();
 						return *error_value;
@@ -149,12 +144,7 @@ namespace JSONator
 				JSON_Value& an(const int t_index)
 				{
 					std::vector<JSON_Value>* temp_value_array = std::get_if<std::vector<JSON_Value>>(&m_value);
-					if (temp_value_array == nullptr)
-					{
-						JSON_Value* error_value = heap_allocate_error_value();
-						return *error_value;
-					}
-					else if (t_index > temp_value_array->size())
+					if (temp_value_array == nullptr || t_index > temp_value_array->size())
 					{
 						JSON_Value* error_value = heap_allocate_error_value();
 						return *error_value;
@@ -199,7 +189,6 @@ namespace JSONator
 		private:
 			std::string m_object_key;
 			std::variant<JSON_KVP, std::vector<JSON_KVP>> m_kvp;
-			JSON_KVP node_error_kvp = JSON_KVP::make_error_kvp();	// for not found errors with find_by_key()
 
 		private:
 			JSON_KVP& find_by_key(const std::string& t_key)
@@ -277,21 +266,21 @@ namespace JSONator
 
 				m_kvp = init_kvp;
 			}
-			void init_int (const std::string &t_key, const int &t_value) noexcept
+			void init_int (const std::string &t_key, const int t_value) noexcept
 			{
 				JSON_Value init_value;
 				init_value.m_value_individual = t_value;
 
 				init(t_key, init_value);
 			}
-			void init_bool (const std::string &t_key, const bool &t_value) noexcept
+			void init_bool (const std::string &t_key, const bool t_value) noexcept
 			{
 				JSON_Value init_value;
 				init_value.m_value_individual = t_value;
 
 				init(t_key, init_value);
 			}
-			void init_double (const std::string &t_key, const double &t_value) noexcept
+			void init_double (const std::string &t_key, const double t_value) noexcept
 			{
 				JSON_Value init_value;
 				init_value.m_value_individual = t_value;
@@ -416,7 +405,7 @@ namespace JSONator
 			{
 				return 4;
 			}
-			else if (t_string_input[0] == '[')
+			else if (t_string_input[0] == '[') // check for array
 			{
 				return 6;
 			}
