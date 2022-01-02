@@ -21,6 +21,7 @@ JSON_parser/main.cpp
 *.user
 *.userosscache
 *.sln.docstates
+*.sln
 
 # Plaintext files
 *.txt
