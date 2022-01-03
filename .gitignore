@@ -25,6 +25,7 @@ JSON_parser/main.cpp
 
 # Plaintext files
 *.txt
+!license.txt
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
