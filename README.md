@@ -109,7 +109,7 @@ int main()
 Key-value pairs and array contents can be deleted:
 
 ```C++
-#include "jsonator.h"
+#include <jsonator>
 #include <iostream>
 
 using namespace JSONator;
@@ -153,7 +153,7 @@ int main()
 And finally after making changes to the data structure we can serialize it:
 
 ```C++
-#include "jsonator.h"
+#include <jsonator>
 #include <iostream>
 
 using namespace JSONator;
