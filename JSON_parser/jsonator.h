@@ -188,7 +188,7 @@ namespace JSONator
 
 		private:
 			std::string m_object_key;
-			std::variant<JSON_KVP, std::vector<JSON_KVP>> m_kvp;
+			std::variant<std::monostate, JSON_KVP, std::vector<JSON_KVP>> m_kvp;
 
 		private:
 			JSON_KVP& find_by_key(const std::string& t_key)
@@ -902,6 +902,26 @@ namespace JSONator
 			output_string.erase(std::remove(output_string.begin(), output_string.end(), '\n'), output_string.end()); // remove newlines
 			output_string.erase(std::remove(output_string.begin(), output_string.end(), '\r'), output_string.end());
 			return output_string;
+		}
+
+		bool is_empty()
+		{
+			if (std::holds_alternative<std::monostate>(main_list.m_kvp))
+			{
+				return true;
+			}
+			else
+			{
+				std::vector<Node::JSON_KVP>* main_vector_ptr = std::get_if<std::vector<Node::JSON_KVP>>(&main_list.m_kvp);
+				if (main_vector_ptr == nullptr)
+				{
+					return true;
+				}
+				else if (main_vector_ptr->size() > 0)
+				{
+					return false;
+				}
+			}
 		}
 
 		//************************************************ READ ************************************************\\
