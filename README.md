@@ -20,6 +20,10 @@ int main()
     // Here we create a JSON object and initialize it with parse().
     // If the parser finds syntax errors it can't reslove it will return an empty object.
     JSON obj1 = JSON::parse(primitive_test);
+    
+    // Check to make sure the object is not empty
+    bool b = obj1.is_empty();
+    std::cout << b << std::endl; // output: false
 
     // Data is extracted from the object by using a return function. Each type has a separate return function.
     // You must specify the 'path' to the key-value pair that you wish to access with the an() and dn() functions.
