@@ -1,5 +1,5 @@
 # JSONator
-JSONator is a type-safe header-only library for C++. It is intended to be a minimalistic library that supports multi-type arrays and objects, along with a handful of other useful features.
+JSONator is a type-safe header-only library for C++. It is intended to be a minimalistic library that supports multi-type arrays and objects, along with a handful of other useful features. Type determination is done at run-time which allows this library to be used in networking applications.
 
 ## Installation
 Simply store the jsonator.h file on your computer and add it to your projects dependencies in your IDE.
