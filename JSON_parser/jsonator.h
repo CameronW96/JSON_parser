@@ -1189,7 +1189,7 @@ namespace JSONator
 		//************************************************ UPDATE ***********************************************\\
 
 		// Updates an objects key
-		void static update_key(const std::string t_new_key, Node::JSON_KVP& t_object) noexcept
+		void static update_key(const std::string t_new_key, Node::JSON_KVP& t_object)
 		{
 			if (t_object.m_error_state == false)
 			{
@@ -1202,7 +1202,7 @@ namespace JSONator
 		}
 
 		// Overloaded method to update an objects value to a new value of any type
-		void static update_value(const int t_new_value, Node::JSON_KVP& t_object) noexcept
+		void static update_value(const int t_new_value, Node::JSON_KVP& t_object)
 		{
 			if (t_object.m_error_state == false)
 			{
@@ -1214,7 +1214,7 @@ namespace JSONator
 				delete& t_object;
 			}
 		}
-		void static update_value(const double t_new_value, Node::JSON_KVP& t_object) noexcept
+		void static update_value(const double t_new_value, Node::JSON_KVP& t_object)
 		{
 			if (t_object.m_error_state == false)
 			{
@@ -1226,7 +1226,7 @@ namespace JSONator
 				delete& t_object;
 			}
 		}
-		void static update_value(const bool t_new_value, Node::JSON_KVP& t_object) noexcept
+		void static update_value(const bool t_new_value, Node::JSON_KVP& t_object)
 		{
 			if (t_object.m_error_state == false)
 			{
@@ -1238,7 +1238,7 @@ namespace JSONator
 				delete& t_object;
 			}
 		}
-		void static update_value(const std::string t_new_value, Node::JSON_KVP& t_object) noexcept
+		void static update_value(const std::string t_new_value, Node::JSON_KVP& t_object)
 		{
 			if (t_object.m_error_state == false)
 			{
@@ -1250,7 +1250,7 @@ namespace JSONator
 				delete& t_object;
 			}
 		}
-		void static update_value(const int t_new_value, Node::JSON_Value& t_value) noexcept
+		void static update_value(const int t_new_value, Node::JSON_Value& t_value)
 		{
 			if (t_value.m_error_state == false)
 			{
@@ -1261,7 +1261,7 @@ namespace JSONator
 				delete& t_value;
 			}
 		}
-		void static update_value(const double t_new_value, Node::JSON_Value& t_value) noexcept
+		void static update_value(const double t_new_value, Node::JSON_Value& t_value)
 		{
 			if (t_value.m_error_state == false)
 			{
@@ -1272,7 +1272,7 @@ namespace JSONator
 				delete& t_value;
 			}
 		}
-		void static update_value(const bool t_new_value, Node::JSON_Value& t_value) noexcept
+		void static update_value(const bool t_new_value, Node::JSON_Value& t_value)
 		{
 			if (t_value.m_error_state == false)
 			{
@@ -1283,7 +1283,7 @@ namespace JSONator
 				delete& t_value;
 			}
 		}
-		void static update_value(const std::string t_new_value, Node::JSON_Value& t_value) noexcept
+		void static update_value(const std::string t_new_value, Node::JSON_Value& t_value)
 		{
 			if (t_value.m_error_state == false)
 			{
