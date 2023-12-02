@@ -178,7 +178,7 @@ int main()
 ## License
 
 JSONator
-Copyright (c) 2022 Cameron White
+Copyright (c) 2023 Cameron White
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
