@@ -351,6 +351,56 @@ namespace JSONator
 
 		//*************************************** STATIC HELPER FUNCTIONS ***************************************\\
 
+		static std::string json_remove_space(std::string t_json_input)
+		{
+			std::string formatted_json;
+			std::string::iterator it;
+			it = t_json_input.begin();
+
+			while (it != t_json_input.end())
+			{
+				if (*it == ' ')
+				{
+					it++;
+				}
+				else if (*it == '"')
+				{
+					formatted_json.push_back(*it); // Opening quote
+					it++;
+
+					while (*it != '"')
+					{
+						formatted_json.push_back(*it);
+						it++;
+					}
+
+					formatted_json.push_back(*it); // Closing quote
+					it++;
+				}
+				else if (*it == '\'')
+				{
+					formatted_json.push_back(*it); // Opening quote
+					it++;
+
+					while (*it != '\'')
+					{
+						formatted_json.push_back(*it);
+						it++;
+					}
+
+					formatted_json.push_back(*it); // Closing quote
+					it++;
+				}
+				else
+				{
+					formatted_json.push_back(*it);
+					it++;
+				}
+			}
+
+			return formatted_json;
+		}
+		
 		/*
 		* Heap allocates a JSON_Value object with the m_error_state flag set to true.
 		* Object must be deleted by the return, update, or delete function when checking for error state.
@@ -396,6 +446,10 @@ namespace JSONator
 				else if (t_string_input[i] == '.')
 				{
 					decimal_counter++;
+					continue;
+				}
+				else if (t_string_input[i] == '-')
+				{
 					continue;
 				}
 				else
@@ -638,12 +692,17 @@ namespace JSONator
 			// skip any leading white space
 			while (*it == ' ') { it++; }
 			// return an empty kvp array if not reading a JSON object
-			if (*it != '{') { return temp_kvp_array; }
+			// if (*it != '{') { return temp_kvp_array; }
 			// move iterator off of the opening brace
-			it++;
+			//it++;
 			// loop through key value pairs
 			while (true)
 			{
+				// if object move iterator off opening brace (should only occur for the first opening brace in the object)
+				if (*it == '{')
+				{
+					it++;
+				}
 				// skip white space in-between blocks
 				while (*it == ' ' || *it == ',')
 				{
@@ -655,46 +714,91 @@ namespace JSONator
 				{
 					break;
 				}
-				// read key
-				if (*it == '"')
+				// check for array and skip key parsing if found
+				if (*it != '[')
 				{
-					it++;
-					while (*it != '"')
-					{
-						key.push_back(*it);
-						it++;
-					}
-					while (*it != ':') // skip to value
+					// read key
+					if (*it == '"')
 					{
 						it++;
-					}
-					it++;
-				}
-				else
-				{
-					while (*it != ':')
-					{
-						key.push_back(*it);
+						while (*it != '"')
+						{
+							key.push_back(*it);
+							it++;
+						}
+						while (*it != ':') // skip to value
+						{
+							it++;
+						}
 						it++;
 					}
-					it++;
-				}
-				// format key
-				key = format_value(key);
-				// skip white space in-between blocks
-				while (*it == ' ')
-				{
-					it++;
+					else
+					{
+						while (*it != ':')
+						{
+							key.push_back(*it);
+							it++;
+						}
+						it++;
+					}
+					// format key
+					key = format_value(key);
+					// skip white space in-between blocks
+					while (*it == ' ')
+					{
+						it++;
+					}
 				}
 				// read value
-				if (*it == '[') // array
+				if (*it == '"') // string
 				{
-					while (*it != ']')
+					do
 					{
 						value.push_back(*it);
 						it++;
-					}
+					} while (*it != '"');
+					// grab closing quote
 					value.push_back(*it);
+					it++;
+				}
+				else if (*it == '\'') // also string
+				{
+					do
+					{
+						value.push_back(*it);
+						it++;
+					} while (*it != '\'');
+					// grab closing quote
+					value.push_back(*it);
+					it++;
+				}
+				else if (*it == '[') // array
+				{
+					/*while (*it != ']')
+					{
+						value.push_back(*it);
+						it++;
+					}*/
+
+					// Capture opening brace
+					value.push_back(*it);
+					it++;
+
+					int array_counter = 1;
+					while (array_counter != 0)
+					{
+						if (*it == '[') // must track how many nested arrays we are reading 
+						{
+							array_counter++;
+						}
+						else if (*it == ']')
+						{
+							array_counter--;
+						}
+						value.push_back(*it);
+						it++;
+					}
+					//value.push_back(*it);
 				}
 				else if (*it == '{') // object
 				{
@@ -736,7 +840,7 @@ namespace JSONator
 					temp_kvp_array.push_back(Node::JSON_KVP::make_kvp(key, get_value(value)[0]));
 				}
 
-				if (*it == '}')
+				if (it == t_object_input.end() || *it == '}')
 				{
 					break;
 				}
@@ -771,19 +875,85 @@ namespace JSONator
 			// loop through values
 			while (*it != ']')
 			{
-				// skip white space in-between blocks
-				if (*it == ' ')
-				{
-					it++;
-					continue;
-				}
 				// read value
-				while (*it != ',' && *it != ']')
+				if (*it == '"') // string
 				{
+					do
+					{
 						value.push_back(*it);
 						it++;
+					} while (*it != '"');
+					// grab closing quote
+					value.push_back(*it);
+					it++;
 				}
+				else if (*it == '\'') // also string
+				{
+					do
+					{
+						value.push_back(*it);
+						it++;
+					} while (*it != '\'');
+					// grab closing quote
+					value.push_back(*it);
+					it++;
+				}
+				else if (*it == '[') // array
+				{
+					// Capture opening brace
+					value.push_back(*it);
+					it++;
 
+					int array_counter = 1;
+					while (array_counter != 0)
+					{
+						if (*it == '[') // must track how many nested arrays we are reading 
+						{
+							array_counter++;
+						}
+						else if (*it == ']')
+						{
+							array_counter--;
+						}
+						value.push_back(*it);
+						it++;
+					}
+				}
+				// if opening brace is found read contents into buffer until closing brace
+				else if (*it == '{') // object
+				{
+					value.push_back(*it);
+					it++;
+
+					int object_counter = 1;
+					while (object_counter != 0)
+					{
+						if (*it == '{') // must track how many nested objects we are reading 
+						{
+							object_counter++;
+						}
+						else if (*it == '}')
+						{
+							object_counter--;
+						}
+						value.push_back(*it);
+						it++;
+					}
+
+					// append closing brace and move iterator forward
+					/*value.push_back('}');
+					it++;*/
+				}
+				else
+				{
+					while (*it != ',' && *it != ']')
+					{
+						value.push_back(*it);
+						it++;
+					}
+				}
+			
+		
 				std::vector<Node::JSON_Value> value_vector = get_value(value);
 				if (value_vector.size() > 1) // is an array
 				{
@@ -900,7 +1070,7 @@ namespace JSONator
 		static JSON parse(std::string t_json_input)
 		{
 			JSON temp_list;
-			temp_list.main_list.init_object("", read_object(t_json_input));
+			temp_list.main_list.init_object("", read_object(json_remove_space(t_json_input)));
 			return temp_list;			
 		}
 
@@ -1153,24 +1323,29 @@ namespace JSONator
 		* primarily to provide a specific array index to the return, update, or delete methods.
 		* @returns JSON_Value&
 		*/
-		Node::JSON_KVP& an(int t_index)
+		Node::JSON_Value& an(int t_index)
 		{
-			std::vector<Node::JSON_KVP>* temp_kvp_array = std::get_if<std::vector<Node::JSON_KVP>>(&main_list.m_kvp);
-			if (temp_kvp_array == nullptr)
+			std::vector<Node::JSON_KVP>* main_list_kvp = std::get_if<std::vector<Node::JSON_KVP>>(&main_list.m_kvp);
+			if (main_list_kvp == nullptr)
 			{
-				Node::JSON_KVP* error_kvp = heap_allocate_error_kvp();
-				return *error_kvp;
+				Node::JSON_Value* error_value = heap_allocate_error_value();
+				return *error_value;
 			}
-			else if (t_index > temp_kvp_array->size())
+			
+			std::vector<Node::JSON_Value> *temp_kvp_array = std::get_if<std::vector<Node::JSON_Value>>(&(*main_list_kvp)[0].m_value);
+
+
+			if (t_index > temp_kvp_array->size())
 			{
-				Node::JSON_KVP* error_kvp = heap_allocate_error_kvp();
-				return *error_kvp;
+				Node::JSON_Value* error_value = heap_allocate_error_value();
+				return *error_value;
 			}
 			else
 			{
-				Node::JSON_KVP& temp_kvp = (*temp_kvp_array)[t_index];
-				return temp_kvp;
+				Node::JSON_Value& temp_value = (*temp_kvp_array)[t_index];
+				return temp_value;
 			}		
+
 		}
 
 		/*
